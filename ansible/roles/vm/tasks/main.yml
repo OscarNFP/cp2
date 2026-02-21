@@ -1,0 +1,57 @@
+#SPDX-License-Identifier: MIT-0
+# tasks file for roles/vm
+---
+- name: Actualizando listado de repositorios...
+  become: yes
+  ansible.builtin.apt:
+    update_cache: yes
+
+- name: Instalando Podman...
+  become: yes
+  ansible.builtin.apt:
+    name: podman
+    state: present
+
+- name: Creando usuario basico...
+  become: yes
+  ansible.builtin.user:
+    name: "{{ usuario_basico }}"
+    password: "{{ password_basico | password_hash('sha512') }}"
+
+- name: Accediendo a ACR...
+  become: yes
+  containers.podman.podman_login:
+    registry: "{{ acr_url }}"
+    username: "{{ acr_user }}"
+    password: "{{ acr_password }}"
+
+- name: Descargando imagen desde ACR...
+  become: yes
+  containers.podman.podman_image:
+    name: "{{ imagen_app }}"
+    state: present
+    force: true
+
+- name: Creando directorio de volumen...
+  become: yes
+  ansible.builtin.file:
+    path: /opt/appdata
+    state: directory
+    owner: "{{ usuario_basico }}"
+    mode: '0755'
+
+- name: Arrancando contenedor con volumen...
+  become: yes
+  containers.podman.podman_container:
+    name: app
+    image: "{{ imagen_app }}"
+    state: started
+    volumes:
+      - "/opt/appdata:/data"
+    recreate: yes
+
+- name: Reiniciando servicio del contenedor...
+  become: yes
+  containers.podman.podman_container:
+    name: app
+    state: restarted

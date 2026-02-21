@@ -1,0 +1,9 @@
+#SPDX-License-Identifier: MIT-0
+---
+# vars file for roles/vm
+acr_url: "miacr.azurecr.io"
+acr_user: "usuario"
+acr_password: "contraseña"
+imagen_app: "miacr.azurecr.io/nginx:latest"
+usuario_basico: "appuser"
+password_basico: "1234"

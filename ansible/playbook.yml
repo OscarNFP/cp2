@@ -1,0 +1,18 @@
+---
+- name: Configurar ACR
+  hosts: localhost
+  vars_files:
+    - secrets.yml
+  tasks:
+    - name: Pull, tag and push de la imagen al ACR para su posterior uso en AKS
+      include_role:
+        name: acr
+
+- name: Configuración del servidor WEB
+  hosts: webapp
+  vars_files:
+    - secrets.yml
+  tasks:
+    - name: Configurar VM usando Podman y despliegue del servidor web
+      include_role:
+        name: vm

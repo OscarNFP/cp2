@@ -1,0 +1,30 @@
+#SPDX-License-Identifier: MIT-0
+---
+# tasks file for roles/acr
+- name: Conectándo a ACR...
+  containers.podman.podman_login:
+    registry: "{{ acr_url }}"
+    username: "{{ acr_user }}"
+    password: "{{ acr_password }}"
+
+- name: Descargando imágenes públicas de Docker Hub...
+  containers.podman.podman_image:
+    name: "{{ item }}"
+    state: present
+  loop: "{{ imagenes_publicas }}"
+
+- name: Etiquetando las imágenes para ACR...
+  containers.podman.podman_tag:
+    image: "{{ item }}"
+    target_names:
+      - "{{ acr_url }}/{{ item }}"
+  loop: "{{ imagenes_publicas }}"
+
+- name: Subiendo las imágenes al ACR...
+  containers.podman.podman_image:
+    name: "{{ acr_url }}/{{ item }}"
+    push: true
+  loop: "{{ imagenes_publicas }}"
+
+
+
