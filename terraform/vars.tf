@@ -244,5 +244,11 @@ variable "admin_username" {
 variable "environment" {
     description = "Etiqueta de entorno para todos los recursos"
     type        = string
+    default     = "development"
+}
+
+variable "project" {
+    description = "Etiqueta de proyecto para todos los recursos"
+    type        = string
     default     = "casopractico2"
 }
