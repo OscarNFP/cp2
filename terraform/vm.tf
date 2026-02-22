@@ -20,6 +20,7 @@ resource "azurerm_linux_virtual_machine" "cp2linuxvm" {
     os_disk {
         caching              = var.os_disk_caching
         storage_account_type = var.os_disk_storage_account_type
+        disk_size_gb         = var.os_disk_size_gb
     }
 
     # Imagen de la máquina virtual

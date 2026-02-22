@@ -212,6 +212,12 @@ variable "os_disk_storage_account_type" {
     default     = "Standard_LRS"
 }
 
+variable "os_disk_size_gb" {
+    description = "Tamaño del disco del sistema operativo en GB"
+    type        = number
+    default     = 30
+}
+
 variable "vm_image_publisher" {
     description = "Editor de la imagen de la máquina virtual"
     type        = string
