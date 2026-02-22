@@ -3,6 +3,11 @@
 ########################################
 # Variables de infraestructura general #
 ########################################
+variable "subscription_id" {
+    description = "ID de la suscripción de Azure"
+    type        = string
+    default     = "tu_subscription_id_aqui"
+}
 
 variable "resource_group_name" {
     description = "Nombre del grupo de recursos"

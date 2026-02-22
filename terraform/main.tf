@@ -15,6 +15,7 @@ terraform {
 # Aquí se declara el proveedor de Azure y se configuran las credenciales para la autenticación.
 provider "azurerm" {
     features {}
+    subscription_id = var.subscription_id
 }
 
 # Aquí se declara el grupo de recursos
