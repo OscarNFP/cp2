@@ -133,9 +133,9 @@ variable nsg_name {
 }
 
 variable "nsg_rule_name" {
-    description = "Nombre de la regla de seguridad para SSH"
+    description = "Nombre de la regla de seguridad"
     type    = string
-    default = "SSH"
+    default = "SecurityRule1"
 }
 
 variable "nsg_rule_priority" {
