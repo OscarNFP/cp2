@@ -263,3 +263,25 @@ variable "project" {
     type        = string
     default     = "casopractico2"
 }
+
+############################################
+# Azure Container Registry variables
+############################################
+
+variable "acr_name" {
+    description = "Nombre del Azure Container Registry"
+    type        = string
+    default     = "1acrregcp2"
+}
+
+variable "acr_sku" {
+    description = "SKU del ACR"
+    type        = string
+    default     = "Basic"
+}
+
+variable "acr_admin_enabled" {
+    description = "Habilitar usuario administrador del ACR"
+    type        = bool
+    default     = true
+}

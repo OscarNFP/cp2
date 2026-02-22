@@ -35,3 +35,22 @@ output "vm_name" {
   description = "Nombre de la máquina virtual creada"
   value       = azurerm_linux_virtual_machine.cp2linuxvm.name
 }
+############################################
+# ACR Outputs
+############################################
+
+output "acr_login_server" {
+  description = "Servidor de login del ACR"
+  value       = azurerm_container_registry.acr.login_server
+}
+
+output "acr_admin_username" {
+  description = "Usuario admin del ACR"
+  value       = azurerm_container_registry.acr.admin_username
+}
+
+output "acr_admin_password" {
+  description = "Password admin del ACR"
+  value       = azurerm_container_registry.acr.admin_password
+  sensitive   = true
+}
