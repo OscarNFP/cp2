@@ -24,6 +24,7 @@ resource "azurerm_resource_group" "rg" {
 
     tags = {
         environment = var.environment
+        project     = var.project
     }
 }
 
@@ -36,6 +37,7 @@ resource "azurerm_storage_account" "storage" {
     account_replication_type = var.storage_account_replication_type
     tags = {
         environment = var.environment
+        project     = var.project
     }
 }
 
@@ -49,5 +51,6 @@ resource "azurerm_ssh_public_key" "ssh" {
 
     tags = {
         environment = var.environment
+        project     = var.project
     }
 }

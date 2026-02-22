@@ -23,6 +23,7 @@ resource "azurerm_network_security_group" "cp2securitygroup" {
 
     tags = {
         environment = var.environment
+        project     = var.project
     }
 }
 

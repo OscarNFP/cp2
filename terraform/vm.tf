@@ -43,5 +43,6 @@ resource "azurerm_linux_virtual_machine" "cp2linuxvm" {
 
     tags = {
         environment = var.environment
+        project     = var.project
     }
 }

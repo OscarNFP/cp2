@@ -44,14 +44,22 @@
   become: yes
   containers.podman.podman_container:
     name: app
-    image: "{{ imagen_app }}"
+    image: "{{ item }}"
     state: started
+    ports:
+      - "{{ nginx_port_host }}:{{ nginx_port_container }}"
     volumes:
-      - "/opt/appdata:/data"
+      - "/opt/{{ nginx_volume }}:/data"
     recreate: yes
+  loop: "{{ imagenes_publicas }}"
 
 - name: Reiniciando servicio del contenedor...
   become: yes
   containers.podman.podman_container:
     name: app
-    state: restarted
+    image: "{{ imagen_app }}"
+    state: started
+    restart: true
+    restart_policy: "no"
+    ports:
+        - "{{ nginx_port_host }}:{{ nginx_port_container }}"
