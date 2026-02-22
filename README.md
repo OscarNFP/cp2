@@ -58,6 +58,11 @@ terraform apply
 
 > Revisa siempre el `plan` antes de aplicar para verificar los recursos que se van a crear.
 
+> Revisa la salida output con la información importante de los recursos que has creado.
+
+> El comando `terraform output -raw acr_admin_password` devolverá la clave de aceso al ACR para luego poder
+  trabajar con Ansible las imágenes que tengamos que obtener de un repositorio externo o enviar al ACR.
+
 ### 3. Aprovisionamiento y despliegue con Ansible
 
 Una vez desplegada la infraestructura, Ansible se encarga de:
