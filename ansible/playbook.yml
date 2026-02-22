@@ -9,7 +9,7 @@
         name: acr
 
 - name: Configuración del servidor WEB
-  hosts: webapp
+  hosts: vm
   vars_files:
     - secrets.yml
   tasks:

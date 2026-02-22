@@ -132,48 +132,48 @@ variable nsg_name {
     default     = "cp2securitygroup1"
 }
 
-variable "nsg_rule_ssh_name" {
+variable "nsg_rule_name" {
     description = "Nombre de la regla de seguridad para SSH"
     type    = string
     default = "SSH"
 }
 
-variable "nsg_rule_ssh_priority" {
+variable "nsg_rule_priority" {
     type    = number
     default = 1001
 }
 
-variable "nsg_rule_ssh_direction" {
+variable "nsg_rule_direction" {
     type    = string
     default = "Inbound"
 }
 
-variable "nsg_rule_ssh_access" {
+variable "nsg_rule_access" {
     type    = string
     default = "Allow"
 }
 
-variable "nsg_rule_ssh_protocol" {
+variable "nsg_rule_protocol" {
     type    = string
     default = "Tcp"
 }
 
-variable "nsg_rule_ssh_source_port" {
+variable "nsg_rule_source_port" {
     type    = string
     default = "*"
 }
 
-variable "nsg_rule_ssh_destination_port" {
-    type    = string
-    default = "22"
+variable "nsg_rule_destination_port" {
+    type    = list(string)
+    default = ["22", "8086"]
 }
 
-variable "nsg_rule_ssh_source_prefix" {
+variable "nsg_rule_source_prefix" {
     type    = string
     default = "*"
 }
 
-variable "nsg_rule_ssh_destination_prefix" {
+variable "nsg_rule_destination_prefix" {
     type    = string
     default = "*"
 }

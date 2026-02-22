@@ -4,5 +4,7 @@
 acr_url: "miacr.azurecr.io"
 acr_user: "usuario"
 acr_password: "contraseña"
+app_name: "nginx"
+tag_imagen: "casopractico2"
 imagenes_publicas:
   - "docker.io/library/nginx:latest"

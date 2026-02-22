@@ -51,7 +51,7 @@
     volumes:
       - "/opt/{{ nginx_volume }}:/data"
     recreate: yes
-  loop: "{{ imagenes_publicas }}"
+  loop: "{{ imagenes_acr }}"
 
 - name: Reiniciando servicio del contenedor...
   become: yes

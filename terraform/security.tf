@@ -10,15 +10,15 @@ resource "azurerm_network_security_group" "cp2securitygroup" {
     resource_group_name = azurerm_resource_group.rg.name
 
     security_rule {
-        name                       = var.nsg_rule_ssh_name
-        priority                   = var.nsg_rule_ssh_priority
-        direction                  = var.nsg_rule_ssh_direction
-        access                     = var.nsg_rule_ssh_access
-        protocol                   = var.nsg_rule_ssh_protocol
-        source_port_range          = var.nsg_rule_ssh_source_port
-        destination_port_range     = var.nsg_rule_ssh_destination_port
-        source_address_prefix      = var.nsg_rule_ssh_source_prefix
-        destination_address_prefix = var.nsg_rule_ssh_destination_prefix
+        name                       = var.nsg_rule_name
+        priority                   = var.nsg_rule_priority
+        direction                  = var.nsg_rule_direction
+        access                     = var.nsg_rule_access
+        protocol                   = var.nsg_rule_protocol
+        source_port_range          = var.nsg_rule_source_port
+        destination_port_range     = var.nsg_rule_destination_port
+        source_address_prefix      = var.nsg_rule_source_prefix
+        destination_address_prefix = var.nsg_rule_destination_prefix
     }
 
     tags = {

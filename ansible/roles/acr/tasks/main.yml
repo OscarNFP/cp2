@@ -17,12 +17,12 @@
   containers.podman.podman_tag:
     image: "{{ item }}"
     target_names:
-      - "{{ acr_url }}/{{ item }}"
+      - "{{ acr_url }}/{{ app_name }}:{{ tag_imagen }}"
   loop: "{{ imagenes_publicas }}"
 
 - name: Subiendo las imágenes al ACR...
   containers.podman.podman_image:
-    name: "{{ acr_url }}/{{ item }}"
+    name: "{{ acr_url }}/{{ app_name }}:{{ tag_imagen }}"
     push: true
   loop: "{{ imagenes_publicas }}"
 

@@ -1,11 +1,20 @@
 [vm]
-azurecp2
+mihost
 
 [acr]
 localhost
 
 [all:vars]
-acr_name=1acrregcp2
+acr_name=miacrname
+
+[vm:vars]
+ansible_ssh_private_key_file=~/.ssh/unir/azure/id_rsa_azure
+ansible_user=vm_user
+
+[acr:vars]
+ansible_user=mi_localhost_user
+ansible_ssh_private_key_file=~/.ssh/unir/azure/id_rsa_azure
+
 
 [localhost]
 127.0.0.1 ansible_connection=local
