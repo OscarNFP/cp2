@@ -16,7 +16,7 @@ resource "azurerm_network_security_group" "cp2securitygroup" {
         access                     = var.nsg_rule_access
         protocol                   = var.nsg_rule_protocol
         source_port_range          = var.nsg_rule_source_port
-        destination_port_range     = var.nsg_rule_destination_port
+        destination_port_ranges    = var.nsg_rule_destination_ports
         source_address_prefix      = var.nsg_rule_source_prefix
         destination_address_prefix = var.nsg_rule_destination_prefix
     }

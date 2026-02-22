@@ -163,7 +163,7 @@ variable "nsg_rule_source_port" {
     default = "*"
 }
 
-variable "nsg_rule_destination_port" {
+variable "nsg_rule_destination_ports" {
     type    = list(string)
     default = ["22", "8086"]
 }
