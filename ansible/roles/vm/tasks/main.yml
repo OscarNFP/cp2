@@ -28,7 +28,7 @@
 - name: Descargando imagen desde ACR...
   become: yes
   containers.podman.podman_image:
-    name: "{{ imagen_app }}"
+    name: "{{ acr_url }}/{{ app_name }}:{{ tag_imagen }}"
     state: present
     force: true
 
@@ -44,20 +44,19 @@
   become: yes
   containers.podman.podman_container:
     name: app
-    image: "{{ item }}"
+    image: "{{ acr_url }}/{{ app_name }}:{{ tag_imagen }}"
     state: started
     ports:
       - "{{ nginx_port_host }}:{{ nginx_port_container }}"
     volumes:
       - "/opt/{{ nginx_volume }}:/data"
     recreate: yes
-  loop: "{{ imagenes_acr }}"
 
 - name: Reiniciando servicio del contenedor...
   become: yes
   containers.podman.podman_container:
     name: app
-    image: "{{ imagen_app }}"
+    image: "{{ app_name }}:{{ tag_imagen }}"
     state: started
     restart: true
     restart_policy: "no"

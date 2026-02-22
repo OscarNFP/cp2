@@ -9,22 +9,22 @@
 
 - name: Descargando imágenes públicas de Docker Hub...
   containers.podman.podman_image:
-    name: "{{ item }}"
+    name: "{{ item.src }}"
     state: present
-  loop: "{{ imagenes_publicas }}"
+  loop: "{{ imagenes }}"
 
 - name: Etiquetando las imágenes para ACR...
   containers.podman.podman_tag:
-    image: "{{ item }}"
+    image: "{{ item.src }}"
     target_names:
-      - "{{ acr_url }}/{{ app_name }}:{{ tag_imagen }}"
-  loop: "{{ imagenes_publicas }}"
+      - "{{ acr_url }}/{{ item.dst }}:{{ tag_imagen }}"
+  loop: "{{ imagenes }}"
 
 - name: Subiendo las imágenes al ACR...
   containers.podman.podman_image:
-    name: "{{ acr_url }}/{{ app_name }}:{{ tag_imagen }}"
+    name: "{{ acr_url }}/{{ item.dst }}:{{ tag_imagen }}"
     push: true
-  loop: "{{ imagenes_publicas }}"
+  loop: "{{ imagenes }}"
 
 
 

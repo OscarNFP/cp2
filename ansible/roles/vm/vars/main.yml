@@ -1,14 +1,3 @@
 #SPDX-License-Identifier: MIT-0
 ---
 # vars file for roles/vm
-acr_url: "miacr.azurecr.io"
-acr_user: "mi_usuario_acr"
-acr_password: "mi_password_acr"
-imagen_app: "miacr.azurecr.io/nginx:casopractico2"
-usuario_basico: "appuser"
-password_basico: "genera_password_segura"
-nginx_port_host: 8086
-nginx_port_container: 80
-nginx_volume: "appdata"
-imagenes_acr:
-  - "miacr.azurecr.io/nginx:casopractico2"

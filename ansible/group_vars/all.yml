@@ -1,0 +1,10 @@
+---
+app_name: "nginx"
+tag_imagen: "casopractico2"
+nginx_port_host: 8086
+nginx_port_container: 80
+nginx_volume: "appdata"
+imagenes:
+  - src: "docker.io/library/nginx:latest"
+    dst: "nginx"
+
