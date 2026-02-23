@@ -8,7 +8,7 @@
       include_role:
         name: acr
 
-- name: Configuración del servidor WEB
+- name: Configuración de la VM
   hosts: vm
   vars_files:
     - secrets.yml
@@ -16,3 +16,12 @@
     - name: Configurar VM usando Podman y despliegue del servidor web
       include_role:
         name: vm
+
+- name: Configuración de AKS y despliegue de la aplicación
+  hosts: localhost
+  vars_files:
+    - secrets.yml
+  tasks:
+    - name: Despliegue a la infraestructura de AKS
+      include_role:
+        name: aks    

@@ -31,6 +31,8 @@ resource "azurerm_network_interface" "cp2nic" {
         private_ip_address_allocation = var.network_interface_private_ip_address_allocation
         public_ip_address_id          = azurerm_public_ip.cp2publicip.id
     }
+    
+    depends_on = [azurerm_public_ip.cp2publicip]
 
     tags = {
         environment = var.environment

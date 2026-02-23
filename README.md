@@ -41,13 +41,22 @@ Antes de ejecutar el proyecto, asegúrate de tener instaladas y configuradas las
 ### 1. Clonar el repositorio
 
 ```bash
-git clone <url-del-repositorio>
+git clone <https://github.com/OscarNFP/cp2.git>
 cd cp2
 ```
 
 ### 2. Despliegue de infraestructura con Terraform
 
-Terraform se encarga de crear todos los recursos en Azure de forma automatizada:
+Configurar Subscription ID obtenido del az login en `vars.tf`:
+
+```bash
+AZ_SUBS_ID=$(az account show | grep '"id":' | awk -F "\"" '{print $4}')
+sed -i "s|AZ_SUBS_ID|$AZ_SUBS_ID|g" terraform/vars.tf
+unset $AZ_SUBS_ID
+```
+
+Terraform se encarga de crear todos los recursos en Azure de forma automatizada. Para ello ejecutaremos
+los siguientes comandos:
 
 ```bash
 cd terraform
@@ -58,9 +67,11 @@ terraform apply
 
 > Revisa siempre el `plan` antes de aplicar para verificar los recursos que se van a crear.
 
+> Si se modifica el provider, recuerda lanzar `terraform init --upgrade` antes de hacer el `plan`
+
 > Revisa la salida output con la información importante de los recursos que has creado.
 
-> El comando `terraform output -raw acr_admin_password` devolverá la clave de aceso al ACR para luego poder
+> El comando `terraform output -raw acr_admin_password` devolverá la clave de acceso al ACR para luego poder
   trabajar con Ansible las imágenes que tengamos que obtener de un repositorio externo o enviar al ACR.
 
 ### 3. Aprovisionamiento y despliegue con Ansible
@@ -71,8 +82,18 @@ Una vez desplegada la infraestructura, Ansible se encarga de:
 - Desplegar una aplicación en forma de contenedor sobre el sistema operativo utilizando Podman.
 - Desplegar otra aplicación con almacenamiento persistente sobre el clúster AKS.
 
+Configuramos en secrets.yml las credenciales y en inventory las IP/hosts:
+
 ```bash
 cd ansible
+# Aquí añado los pasos necesarios para preparar las variables antes del despliegue
+# Almacenar el valor de las variables en el fichero secrets.yml
+# Entre ellas, el resultado de terraform output -raw acr_admin_password
+# se almacenará en una variable para luego ser insertado en el secrets.yml
+```
+
+Desplegamos con Ansible
+```bash
 ansible-playbook -i inventory playbook.yml
 ```
 

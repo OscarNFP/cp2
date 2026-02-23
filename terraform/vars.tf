@@ -6,7 +6,7 @@
 variable "subscription_id" {
     description = "ID de la suscripción de Azure"
     type        = string
-    default     = "tu_subscription_id_aqui"
+    default     = "AZ_SUBS_ID"
 }
 
 variable "resource_group_name" {
@@ -284,4 +284,56 @@ variable "acr_admin_enabled" {
     description = "Habilitar usuario administrador del ACR"
     type        = bool
     default     = true
+}
+
+############################################
+# AKS
+############################################
+
+variable "aks_name" {
+    description = "Nombre del clúster AKS"
+    type        = string
+    default     = "tf-aks-casopractico2"
+}
+
+variable "aks_dns_prefix" {
+    description = "DNS prefix para el clúster AKS"
+    type        = string
+    default     = "tfaksdns"
+}
+
+variable "aks_sku_tier" {
+    description = "SKU tier del clúster AKS"
+    type        = string
+    default     = "Free"
+}
+
+variable "aks_node_count" {
+    description = "Número de nodos del pool por defecto"
+    type        = number
+    default     = 1
+}
+
+variable "aks_node_vm_size" {
+    description = "Tamaño de las VMs del node pool"
+    type        = string
+    default     = "Standard_B4ls_v2" # Este tiene 4 vCPU y 8 GB de RAM
+}
+
+variable "aks_node_pool_name" {
+    description = "Nombre del node pool por defecto"
+    type        = string
+    default     = "default"
+}
+
+variable "aks_identity_type" {
+    description = "Tipo de identidad para el clúster AKS"
+    type        = string
+    default     = "SystemAssigned"
+}
+
+variable "acr_pull_role_name" {
+    description = "Nombre del rol para permitir pull desde ACR"
+    type        = string
+    default     = "AcrPull"
 }
