@@ -45,17 +45,17 @@ git clone https://github.com/OscarNFP/cp2.git
 cd cp2
 ```
 
-### 2. Instalar dependencias
+### 2. Ejecutar menú interactivo
+
+- En el menú interactivo podremos elegir entre:
+> Instalar dependencias
+  Iniciar despliegue
+  Destruir intraestructura
+  Salir
 
 ```bash
 cd scripts
-./setup.sh
-```
-
-### 3. Despliegue de infraestructura 
-
-```bash
-./init_deploy.sh
+./start.sh
 ```
 
 ### Alternativamente, es posible desplegar toda la infraestructura lanzando los siguientes comandos de forma manual:
@@ -65,7 +65,7 @@ cd scripts
 Configurar Subscription ID obtenido del az login en `vars.tf`:
 
 ```bash
-AZ_SUBS_ID=$(az account show | grep '"id":' | awk -F "\"" '{print $4}')
+AZ_SUBS_ID=$(az account show --query "id" -o tsv)
 sed -i "s|AZ_SUBS_ID|$AZ_SUBS_ID|g" terraform/vars.tf
 unset $AZ_SUBS_ID
 ```

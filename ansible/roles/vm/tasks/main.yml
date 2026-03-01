@@ -28,9 +28,9 @@
 - name: Descargando imagen desde ACR...
   become: yes
   containers.podman.podman_image:
-    name: "{{ acr_url }}/{{ app_name }}:{{ tag_imagen }}"
-    state: present
-    force: true
+    name: "{{ acr_url }}/{{ app_name }}"
+    tag: "{{ tag_imagen }}"
+    pull: true
 
 - name: Creando directorio de volumen...
   become: yes

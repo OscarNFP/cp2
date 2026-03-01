@@ -5,7 +5,8 @@
 # Autor: Óscar Nappo
 # Fecha de creación: 01/03/2026
 # Proyecto: Despliegue de Infraestructura en Azure con Terraform y Ansible
-# Versión: 1.0
+# Versión: 1.1
+# Fecha última modificación: 01/03/2026
 # Descripción:
 #   Este script se encarga de inicializar el entorno para el despliegue
 #   de la infraestructura utilizando Terraform y posteriormente configurar 
@@ -16,6 +17,7 @@
 # - `set -e`: Hace que el script termine si cualquier comando devuelve un error.
 # - `set -u`: Hace que el script termine si se intenta usar una variable no definida.
 # - `set -o pipefail`: Hace que el script termine si cualquier comando en una tubería devuelve un error.
+
 set -euo pipefail
 
 # Directorio raíz del proyecto
@@ -114,9 +116,17 @@ extract_tf_output() {
     echo "$value"
 }
 
+############################
+# BLOQUE MANEJO DE ERRORES #
+############################
+
 # Configurar un trap para manejar errores y limpiar variables sensibles al finalizar el script. 
 # También realiza un rollback de los archivos de configuración en caso de error.
 trap 'exit_code=$?; [ $exit_code -ne 0 ] && log_error "El script terminó inesperadamente. Revise los errores arriba indicados"; rollback_config_files; unset_sensitive_variables' EXIT
+
+#################################################
+# BLOQUE COMPROBACIÓN DE EXISTENCIA DE FICHEROS #
+#################################################
 
 # Comprobar que los archivos de configuración existen
 for file in "$TF_VARS_FILE" "$ANSIBLE_SECRET_FILE" "$ANSIBLE_INVENTORY_FILE"; do
@@ -132,6 +142,10 @@ if ! az account show > /dev/null 2>&1; then
     exit 1
 fi
 
+####################################################
+# BLOQUE BACKUP FICHEROS Y CONFIGURACIÓN TERRAFORM #
+####################################################
+
 #Copia de seguridad del archivo de variables de Terraform antes de modificarlo
 cp "$TF_VARS_FILE" "${TF_VARS_FILE}.template"
 
@@ -143,12 +157,17 @@ then
     exit 1
 fi
 
+##################################################
+# BLOQUE DESPLIEGUE INFREAESTRUCTURA - TERRAFORM #
+##################################################
+
 # Despliegue de la infraestructura en Terraform
 if ! terraform -chdir=$TF_DIR init || ! terraform -chdir=$TF_DIR plan || ! terraform -chdir=$TF_DIR apply -auto-approve; then
     log_error "Error durante la ejecución de Terraform. Verifique los mensajes anteriores para más detalles."
     exit 1
 fi
 
+echo ""
 log_info "Extrayendo información de la infraestructura desplegada..."
 
 # Extracción de las credenciales del ACR creado
@@ -174,7 +193,12 @@ BASIC_USER_PASSWORD=$(head -c 100 /dev/urandom | tr -dc 'A-Za-z0-9@' | head -c 2
 # Obtener el nombre de usuario del sistema local
 LOCALHOST_USER=$(whoami)
 
+echo ""
 log_info "Despliegue de infraestructura completado. Procediendo con la configuración de Ansible..."
+
+##################################################
+# BLOQUE BACKUP FICHEROS Y CONFIGURACIÓN ANSIBLE #
+##################################################
 
 # Copia de seguridad de los archivos de Ansible antes de modificarlos
 cp "$ANSIBLE_SECRET_FILE" "${ANSIBLE_SECRET_FILE}.template"
@@ -210,6 +234,10 @@ done
 
 log_info "Archivo de inventario de Ansible actualizado correctamente. Listo para ejecutar los playbooks..."
 
+##################################################
+# BLOQUE DESPLIEGUE INFREAESTRUCTURA - TERRAFORM #
+##################################################
+
 # Ejecutar el playbook de Ansible para configurar los recursos desplegados
 ansible-playbook -i $ANSIBLE_INVENTORY_FILE $ANSIBLE_PLAYBOOK_FILE
 
@@ -221,15 +249,34 @@ if [ $exit_code -ne 0 ]; then
     exit 1
 fi
 
+##################
+# BLOQUE OUTPUTS #
+##################
+
 # Extracción los datos finales del clúster
-CL_IP=$(kubectl get service frontend -n $K8S_NAMESPACE -o jsonpath='{.status.loadBalancer.ingress[0].ip}')
-# Añadio 3 segundos de retraso para que se pueda obtener la IP
-log_info "."
-sleep 1
-log_info ".."
-sleep 1
-log_info "..."
-sleep 1
+# Aquí se extrae la dirección IP del servicio Frontend. 
+# Se ejecuta en bucle porque puede tardar en obtener la IP
+# Una vez que la obtiene, continúa.
+
+log_info "Obteniendo IP externa del servicio fronted..."
+CL_IP=""
+RETRIES=0
+MAX_RETRIES=20
+
+while [ -z "$CL_IP" ] && [ $RETRIES -lt $MAX_RETRIES ]; do
+    CL_IP=$(kubectl get service frontend -n $K8S_NAMESPACE -o jsonpath='{.status.loadBalancer.ingress[0].ip}')
+    if [ -z "$CL_IP" ]; then
+        RETRIES=$((RETRIES + 1))
+        log_info "Esperando IP externa... intento $RETRIES/$MAX_RETRIES"
+        sleep 5
+    fi
+done
+
+if [ -z "$CL_IP" ]; then
+    log_error "No se pudo obtener la IP externa del servicio frontend tras $MAX_RETRIES intentos"
+    exit 1
+fi
+
 CL_PORT=$(kubectl get service frontend -n $K8S_NAMESPACE -o jsonpath='{.spec.ports[0].port}')
 FRONTEND_WEB_URL="http://$CL_IP:$CL_PORT"
 
@@ -261,6 +308,9 @@ print_row ""
 print_row "  Kubernetes:"
 print_row "    Cluster:          $CLUSTER_NAME"
 print_row "    Acceso Web:       $FRONTEND_WEB_URL"
+print_row ""
+print_row "  Recuerda que puedes ver el ID de tu suscripción de Azure"
+print_row "  con el siguiente comando: az account show --query 'id' -o tsv"
 print_row ""
 print_line
 
