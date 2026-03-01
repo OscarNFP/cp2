@@ -12,6 +12,16 @@ output "public_ip_address" {
   value       = azurerm_public_ip.cp2publicip.ip_address
 }
 
+###########################################################
+# Nombre del usuario administrador de la máquina virtual
+###########################################################
+output "admin_username" {
+  description = "Nombre de usuario administrador de la VM"
+  value       = var.admin_username
+  sensitive   = true
+}
+
+
 ############################################
 # Comando SSH listo para usar
 ############################################
@@ -35,6 +45,17 @@ output "vm_name" {
   description = "Nombre de la máquina virtual creada"
   value       = azurerm_linux_virtual_machine.cp2linuxvm.name
 }
+
+
+###############################################
+# Acceso web a la aplicación frontend de la VM
+###############################################
+
+output "frontend_access_url" {
+  description = "URL para acceder a la aplicación frontend en la VM"
+  value       = "http://${azurerm_public_ip.cp2publicip.ip_address}:${var.nsg_rule_destination_webport_vm}"
+}
+
 ############################################
 # ACR Outputs
 ############################################
@@ -53,4 +74,13 @@ output "acr_admin_password" {
   description = "Password admin del ACR"
   value       = azurerm_container_registry.acr.admin_password
   sensitive   = true
+}
+
+############################################
+# AKS Outputs
+############################################
+
+output "aks_cluster_name" {
+  description = "Nombre del clúster AKS creado"
+  value       = azurerm_kubernetes_cluster.aks.name
 }

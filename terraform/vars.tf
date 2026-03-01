@@ -174,6 +174,11 @@ variable "nsg_rule_destination_ports" {
     default = ["22", "8086"]
 }
 
+variable "nsg_rule_destination_webport_vm" {
+    type    = string
+    default = "8086"
+}
+
 variable "nsg_rule_source_prefix" {
     type    = string
     default = "*"

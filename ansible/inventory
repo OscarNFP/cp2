@@ -1,5 +1,5 @@
 [vm]
-mihost
+ubuntu-vm
 
 [acr]
 localhost
@@ -8,18 +8,19 @@ localhost
 localhost
 
 [all:vars]
-acr_name=miacrname
+acr_name=ACRNAME
 
 [vm:vars]
+ansible_user=VM_USER
+ansible_host=VM_PUBLIC_IP
 ansible_ssh_private_key_file=~/.ssh/unir/azure/id_rsa_azure
-ansible_user=vm_user
 
 [acr:vars]
-ansible_user=mi_localhost_user
+ansible_user=LOCALHOST_USER
 ansible_ssh_private_key_file=~/.ssh/unir/azure/id_rsa_azure
 
 [aks:vars]
-ansible_user=mi_localhost_user
+ansible_user=LOCALHOST_USER
 ansible_ssh_private_key_file=~/.ssh/unir/azure/id_rsa_azure
 ansible_python_interpreter=/usr/bin/python3.12
 

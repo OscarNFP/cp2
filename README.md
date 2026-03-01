@@ -23,9 +23,9 @@ Antes de ejecutar el proyecto, asegúrate de tener instaladas y configuradas las
 
 - [Terraform](https://developer.hashicorp.com/terraform/install) >= 1.0
 - [Ansible](https://docs.ansible.com/ansible/latest/installation_guide/index.html) >= 2.12
-- Colección de Ansible `containers.podman`:
+- Colección de Ansible `containers.podman` y `azure.azcollection`:
   ```bash
-  ansible-galaxy collection install containers.podman
+  ansible-galaxy collection install containers.podman azure.azcollection
   ```
 - [Azure CLI](https://learn.microsoft.com/es-es/cli/azure/install-azure-cli) instalado y autenticado:
   ```bash
@@ -41,11 +41,26 @@ Antes de ejecutar el proyecto, asegúrate de tener instaladas y configuradas las
 ### 1. Clonar el repositorio
 
 ```bash
-git clone <https://github.com/OscarNFP/cp2.git>
+git clone https://github.com/OscarNFP/cp2.git
 cd cp2
 ```
 
-### 2. Despliegue de infraestructura con Terraform
+### 2. Instalar dependencias
+
+```bash
+cd scripts
+./setup.sh
+```
+
+### 3. Despliegue de infraestructura 
+
+```bash
+./init_deploy.sh
+```
+
+### Alternativamente, es posible desplegar toda la infraestructura lanzando los siguientes comandos de forma manual:
+
+### ALT-1: Despliegue de la infraestructura con Terraform
 
 Configurar Subscription ID obtenido del az login en `vars.tf`:
 
@@ -74,7 +89,7 @@ terraform apply
 > El comando `terraform output -raw acr_admin_password` devolverá la clave de acceso al ACR para luego poder
   trabajar con Ansible las imágenes que tengamos que obtener de un repositorio externo o enviar al ACR.
 
-### 3. Aprovisionamiento y despliegue con Ansible
+### ALT-2. Aprovisionamiento y despliegue con Ansible
 
 Una vez desplegada la infraestructura, Ansible se encarga de:
 
@@ -86,10 +101,7 @@ Configuramos en secrets.yml las credenciales y en inventory las IP/hosts:
 
 ```bash
 cd ansible
-# Aquí añado los pasos necesarios para preparar las variables antes del despliegue
-# Almacenar el valor de las variables en el fichero secrets.yml
-# Entre ellas, el resultado de terraform output -raw acr_admin_password
-# se almacenará en una variable para luego ser insertado en el secrets.yml
+# Aquí deberás sustituir las credenciales obtenidas para el ACR
 ```
 
 Desplegamos con Ansible
@@ -101,13 +113,13 @@ ansible-playbook -i inventory playbook.yml
 
 > Recuerda que puedes personalizar el nombre de los recursos que quieras crear en el fichero `vars.tf`.
 
-### 4. Destruir la infraestructura
+### ALT-3. Destruir la infraestructura
 
 Cuando ya no necesites los recursos, puedes eliminarlos con:
 
 ```bash
 cd terraform
-terraform destroy
+terraform destroy -auto-approve
 ```
 
 ---
