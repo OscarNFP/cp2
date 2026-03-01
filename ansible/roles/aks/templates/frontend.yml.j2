@@ -1,0 +1,53 @@
+# SPDX-License-Identifier: MIT-0
+# En este fichero declaro los recursos de Kubernetes para desplegar
+# el frontend de la aplicación en el clúster AKS, 
+# incluyendo el Deployment y el Service de tipo LoadBalancer.
+
+---
+# Deployment del frontend (azure-vote-front)
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: "{{ app.frontend.name }}"
+  namespace: "{{ app_namespace }}"
+spec:
+  replicas: {{ app.frontend.replicas }}
+  selector:
+    matchLabels:
+      app: "{{ app.frontend.name }}"
+  template:
+    metadata:
+      labels:
+        app: "{{ app.frontend.name }}"
+    spec:
+      nodeSelector:
+        kubernetes.io/os: linux
+      containers:
+        - name: "{{ app.frontend.name }}"
+          image: "{{ app.frontend.image }}"
+          resources:
+            requests:
+              cpu: "{{ app.frontend.requests.cpu }}"
+              memory: "{{ app.frontend.requests.memory }}"
+            limits:
+              cpu: "{{ app.frontend.limits.cpu }}"
+              memory: "{{ app.frontend.limits.memory }}"
+          ports:
+            - containerPort: {{ app.frontend.port }}
+          env:
+            - name: REDIS
+              value: "{{ app.frontend.redis_env }}"
+---
+# Service LoadBalancer del frontend
+apiVersion: v1
+kind: Service
+metadata:
+  name: "{{ app.frontend.name }}"
+  namespace: "{{ app_namespace }}"
+spec:
+  type: LoadBalancer
+  ports:
+    - port: {{ app.frontend.external_port }}
+      targetPort: {{ app.frontend.port }}
+  selector:
+    app: "{{ app.frontend.name }}"

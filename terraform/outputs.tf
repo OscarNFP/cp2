@@ -17,7 +17,7 @@ output "public_ip_address" {
 ############################################
 output "ssh_connection_command" {
   description = "Comando SSH para conectarse a la VM"
-  value       = "ssh -i ${var.ssh_public_key_path} ${var.admin_username}@${azurerm_public_ip.cp2publicip.ip_address}"
+  value       = "ssh ${var.admin_username}@${azurerm_public_ip.cp2publicip.ip_address} -i ${var.ssh_private_key_path}"
 }
 
 ############################################

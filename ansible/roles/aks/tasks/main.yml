@@ -1,3 +1,46 @@
 #SPDX-License-Identifier: MIT-0
 ---
 # tasks file for roles/aks
+# Obtengo las credenciales del clúster AKS y las guardo en un fichero temporal 
+# para su uso posterior con el módulo kubernetes.core.k8s
+- name: Obteniendo credenciales del clúster AKS...
+  azure.azcollection.azure_rm_akscredentials_info:
+    resource_group: "{{ resource_group }}"
+    cluster_name: "{{ aks_name }}"
+    show_admin_credentials: true
+  register: aks_credentials
+
+# Guardando kubeconfig en fichero temporal con permisos restrictivos para su uso posterior con el módulo kubernetes.core.k8s
+- name: Guardando kubeconfig en fichero temporal...
+  ansible.builtin.copy:
+    content: "{{ aks_credentials.cluster_credentials[0].value }}"
+    dest: "{{ kubeconfig_path }}"
+    mode: '0600'
+
+# Creo un namespace específico para la aplicación a desplegar
+- name: Creando namespace...
+  kubernetes.core.k8s:
+    name: "{{ app_namespace }}"
+    api_version: v1
+    kind: Namespace
+    state: present
+
+- name: Creando secreto para acceso al ACR...
+  kubernetes.core.k8s:
+    definition: "{{ lookup('template', 'acr_secrets.yml.j2') }}"
+    state: present
+
+- name: Creando PersistentVolumeClaim...
+  kubernetes.core.k8s:
+    definition: "{{ lookup('template', 'persistentvolumeclaim.yml.j2') }}"
+    state: present
+
+- name: Desplegando backend...
+  kubernetes.core.k8s:
+    definition: "{{ lookup('template', 'backend.yml.j2') }}"
+    state: present
+
+- name: Desplegando frontend...
+  kubernetes.core.k8s:
+    definition: "{{ lookup('template', 'frontend.yml.j2') }}"
+    state: present

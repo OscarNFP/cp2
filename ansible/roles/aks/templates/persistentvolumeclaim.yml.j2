@@ -1,0 +1,20 @@
+# SPDX-License-Identifier: MIT-0
+# En este fichero declaro el recurso de Kubernetes para crear 
+# un PersistentVolumeClaim que luego será utilizado por el 
+# Deployment del backend para almacenar los datos de 
+# forma persistente en el clúster AKS.
+
+---
+# PersistentVolumeClaim para Redis
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: "{{ app.backend.pv }}"
+  namespace: "{{ app_namespace }}"
+spec:
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: "{{ app.backend.storage_class }}"
+  resources:
+    requests:
+      storage: "{{ app.backend.pv_size }}"

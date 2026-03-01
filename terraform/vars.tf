@@ -51,6 +51,12 @@ variable "ssh_public_key_path" {
     default     = "~/.ssh/unir/azure/id_rsa_azure.pub"
 }
 
+variable "ssh_private_key_path" {
+    description = "Ruta al archivo de clave privada SSH"
+    type        = string
+    default     = "~/.ssh/unir/azure/id_rsa_azure"
+}
+
 ##################################
 # Variables de red  - network.tf #
 ##################################

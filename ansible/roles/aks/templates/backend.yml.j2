@@ -1,0 +1,60 @@
+# SPDX-License-Identifier: MIT-0
+# En este fichero declaro los recursos de Kubernetes para desplegar
+# el backend de la aplicación en el clúster AKS, incluyendo el Deployment y el Service interno.
+---
+# Deployment del backend (Redis)
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: "{{ app.backend.name }}"
+  namespace: "{{ app_namespace }}"
+spec:
+  replicas: {{ app.backend.replicas }}
+  selector:
+    matchLabels:
+      app: "{{ app.backend.name }}"
+  template:
+    metadata:
+      labels:
+        app: "{{ app.backend.name }}"
+    spec:
+      # Para que el contenedor de Redis pueda escribir en el volumen persistente
+      # es necesario configurar el securityContext del Pod con un fsGroup que tenga permisos de escritura en el volumen.
+      securityContext:
+        fsGroup: 1001
+      containers:
+        - name: "{{ app.backend.name }}"
+          image: "{{ app.backend.image }}"
+          # Con estos argumentos conseguimos que Redis escriba en el volumen persistente
+          # cada cambio que se haga.
+          # Esto solo funciona para imágenes oficiales de Redis.
+          #args: [ "--appendonly", "yes" ]
+          env:
+            - name: ALLOW_EMPTY_PASSWORD
+              value: "yes"
+            # Con esta variable de entorno habilitamos el modo AOF (Append Only File) de Redis
+            # que hace que cada cambio se escriba en un fichero en el volumen persistente.
+            #- name: REDIS_AOF_ENABLED
+            #  value: "yes"
+          ports:
+            - containerPort: {{ app.backend.port }}
+              name: {{ app.backend.port_name }}
+          volumeMounts:
+            - name: "{{ app.backend.pv }}"
+              mountPath: {{ app.backend.volumepath }}
+      volumes:
+        - name: "{{ app.backend.pv }}"
+          persistentVolumeClaim:
+            claimName: "{{ app.backend.pv }}"
+---
+# Service interno del backend
+apiVersion: v1
+kind: Service
+metadata:
+  name: "{{ app.backend.name }}"
+  namespace: "{{ app_namespace }}"
+spec:
+  ports:
+    - port: {{ app.backend.port }}
+  selector:
+    app: "{{ app.backend.name }}"

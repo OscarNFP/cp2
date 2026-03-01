@@ -7,4 +7,44 @@ nginx_volume: "appdata"
 imagenes:
   - src: "docker.io/library/nginx:latest"
     dst: "nginx"
+  - src: "docker.io/bitnami/redis:latest"
+    dst: "redis"
+  - src: "docker.io/suhuruli/azure-vote-front:latest"
+    dst: "azure-vote-front"
 
+############################################
+# Azure / AKS
+############################################
+resource_group: cp2ResourceGroup
+aks_name: tf-aks-casopractico2
+kubeconfig_path: ~/.kube/config
+
+############################################
+# Aplicación AKS
+############################################
+app_namespace: onfp-casopractico2
+
+app:
+  frontend:
+    name: frontend
+    image: "{{ acr_url }}/azure-vote-front:casopractico2"
+    replicas: 1
+    requests:
+      cpu: 100m
+      memory: 128Mi
+    limits:
+      cpu: 250m
+      memory: 256Mi
+    port: 80
+    external_port: 8080
+    redis_env: backend
+  backend:
+    name: backend
+    image: "{{ acr_url }}/redis:casopractico2"
+    replicas: 1
+    port: 6379
+    port_name: redis
+    pv: redis-data
+    pv_size: 1Gi
+    storage_class: managed-csi
+    volumepath: /bitnami/redis/data
