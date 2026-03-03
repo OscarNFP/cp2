@@ -1,0 +1,264 @@
+#!/bin/bash
+
+# ------------------------------------------------------------------------------
+# Script: setup
+# Proyecto: Despliegue de Infraestructura en Azure con Terraform y Ansible
+# Descripción:
+#   Prepara entorno Python aislado para ejecutar deploy
+# ------------------------------------------------------------------------------
+
+set -euo pipefail
+
+######################################
+# CONFIGURACIÓN
+######################################
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+source "$SCRIPT_DIR/config"
+
+VENV_DIR="/opt/azure-deploy-venv"
+PYTHON_BIN="$(command -v python3)"
+
+######################################
+# LOGGING
+######################################
+
+log() {
+    local LEVEL="$1"
+    shift
+    echo "[$(date '+%Y-%m-%d %H:%M:%S')] [$LEVEL] $*"
+}
+
+log_info()  { log "INFO"  "$@"; }
+log_error() { log "ERROR" "$@"; }
+
+######################################
+# CHECK ROOT
+######################################
+
+if [ "$EUID" -ne 0 ]; then
+    log_error "Debe ejecutarse como root: sudo ./setup.sh"
+    exit 1
+fi
+
+######################################
+# DEPENDENCIAS BASE
+######################################
+
+log_info "Instalando dependencias del sistema..."
+apt update
+apt install -y python3 python3-venv python3-pip curl gnupg software-properties-common ssh podman
+
+####################################
+# FUNCIÓN INSTALACIÓN DE TERRAFORM
+####################################
+
+install_terraform() {
+
+    log_info "Instalando Terraform desde repositorio oficial HashiCorp..."
+
+    # Detectar distro
+    if [ -f /etc/os-release ]; then
+        . /etc/os-release
+        if [ -n "$VERSION_CODENAME" ]; then
+            DISTRO="$VERSION_CODENAME"
+        elif [ -n "$UBUNTU_CODENAME" ]; then
+            DISTRO="$UBUNTU_CODENAME"
+        else
+            DISTRO=$(lsb_release -cs 2>/dev/null || echo "focal")
+        fi
+    else
+        DISTRO=$(lsb_release -cs 2>/dev/null || echo "focal")
+    fi
+
+    # Añadir key de HashiCorp
+    wget -q -O- https://apt.releases.hashicorp.com/gpg | gpg --dearmor | tee /usr/share/keyrings/hashicorp-archive-keyring.gpg > /dev/null
+
+    # Añadir repositorio
+    echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/hashicorp-archive-keyring.gpg] https://apt.releases.hashicorp.com $DISTRO main" \
+        | tee /etc/apt/sources.list.d/hashicorp.list
+
+    # Instalar Terraform
+    apt-get update -qq
+    DEBIAN_FRONTEND=noninteractive apt-get install -y terraform
+
+    # Verificación
+    if ! command -v terraform >/dev/null 2>&1; then
+        log_error "Terraform no se instaló correctamente."
+        exit 1
+    fi
+
+    log_info "Terraform instalado correctamente."
+
+}
+
+######################################
+# CREACIÓN / VALIDACIÓN VENV
+######################################
+
+if [ ! -d "$VENV_DIR" ]; then
+    log_info "Creando entorno virtual en $VENV_DIR..."
+    $PYTHON_BIN -m venv "$VENV_DIR"
+else
+    log_info "El entorno virtual ya existe. Reutilizando."
+fi
+
+PIP_BIN="$VENV_DIR/bin/pip"
+PYTHON_VENV_BIN="$VENV_DIR/bin/python"
+
+log_info "Actualizando pip..."
+"$PIP_BIN" install --upgrade pip setuptools wheel
+
+######################################
+# INSTALACIÓN DEPENDENCIAS PYTHON
+######################################
+
+log_info "Instalando Ansible..."
+#"$PIP_BIN" install "ansible==$ANSIBLE_VERSION"
+"$PIP_BIN" install ansible
+
+log_info "Instalando soporte Azure..."
+#"$PIP_BIN" install "ansible[azure]==$ANSIBLE_VERSION"
+"$PIP_BIN" install --upgrade "ansible[azure]"
+
+log_info "Instalando dependencias de azure..."
+#"$PIP_BIN" install "azure-mgmt-containerservice==$AZURE_SDK_VERSION"
+"$PIP_BIN" install --upgrade azure-cli-core azure-common azure-mgmt-authorization azure-mgmt-resource azure-mgmt-compute azure-mgmt-network azure-mgmt-containerservice msrest msrestazure azure-identity
+
+log_info "Instalando cliente Kubernetes..."
+#"$PIP_BIN" install "kubernetes==$KUBERNETES_PY_VERSION"
+"$PIP_BIN" install --upgrade kubernetes
+
+log_info "Instalando dependencias Python necesarias para AKS..."
+"$PIP_BIN" install --upgrade packaging
+
+# Instalación de la librería lasslib para soportar password_hash
+log_info "Instalando passlib en el entorno virtual..."
+"$PIP_BIN" install --upgrade passlib
+
+# Verificación rápida de dependencias críticas
+for module in ansible azure.identity azure.mgmt.containerservice kubernetes passlib packaging; do
+    if ! "$PYTHON_VENV_BIN" -c "import $module" >/dev/null 2>&1; then
+        log_error "El módulo Python '$module' NO se instaló correctamente en el venv."
+        exit 1
+    fi
+done
+
+######################################
+# INSTALACIÓN AZURE CLI
+######################################
+
+if ! command -v az >/dev/null 2>&1; then
+    log_info "Instalando Azure CLI..."
+
+    curl -sL https://aka.ms/InstallAzureCLIDeb | bash
+
+    if ! command -v az >/dev/null 2>&1; then
+        log_error "Azure CLI no se instaló correctamente."
+        exit 1
+    fi
+fi
+
+######################################
+# INSTALACIÓN COLECCIONES ANSIBLE
+######################################
+
+ANSIBLE_GALAXY_BIN="$VENV_DIR/bin/ansible-galaxy"
+
+log_info "Instalando colecciones Ansible..."
+"$ANSIBLE_GALAXY_BIN" collection install azure.azcollection containers.podman
+
+
+# Instalar las dependencias Python requeridas por azure.azcollection.
+# Puede estar instalado en distintos sitios, por lo que tendremos que buscarlo
+
+AZCOLLECTION_REQUIREMENTS=$(find \
+    "$VENV_DIR" \
+    "$HOME/.ansible/collections" \
+    "/root/.ansible/collections" \
+    "/usr/share/ansible/collections" \
+    -path "*/ansible_collections/azure/azcollection/requirements*.txt" 2>/dev/null | head -1 || true)
+
+if [ -n "$AZCOLLECTION_REQUIREMENTS" ]; then
+    log_info "Instalando dependencias de azure.azcollection desde $AZCOLLECTION_REQUIREMENTS..."
+    "$PIP_BIN" install -r "$AZCOLLECTION_REQUIREMENTS"
+else
+    log_error "No se encontró el requirements.txt de azure.azcollection, continuando con los paquetes Azure ya instalados..."
+    exit 1
+fi
+
+
+######################################
+# VALIDACIONES
+######################################
+
+log_info "Verificando instalación..."
+
+for bin in \
+    "$VENV_DIR/bin/ansible" \
+    "$VENV_DIR/bin/ansible-playbook" \
+    "$VENV_DIR/bin/python"
+do
+    if [ ! -x "$bin" ]; then
+        log_error "Binario no encontrado o no ejecutable: $bin"
+        exit 1
+    fi
+done
+
+for module in azure.mgmt.containerservice kubernetes; do
+    if ! "$PYTHON_VENV_BIN" -c "import $module" >/dev/null 2>&1; then
+        log_error "Módulo Python no disponible: $module"
+        exit 1
+    fi
+done
+
+######################################
+# INSTALACIÓN TERRAFORM
+######################################
+
+if ! command -v terraform >/dev/null 2>&1; then
+    install_terraform
+else
+    log_info "Terraform ya está instalado."
+fi
+
+
+######################################
+# INSTALACIÓN KUBECTL (si no existe)
+######################################
+
+if ! command -v kubectl >/dev/null 2>&1; then
+    log_info "Instalando kubectl..."
+    curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
+    install -o root -g root -m 0755 kubectl /usr/local/bin/kubectl
+    rm kubectl
+fi
+
+######################################
+# LOGIN EN AZURE CLI
+######################################
+
+log_info "Iniciando sesión en Azure CLI..."
+
+# Si ya hay sesión activa, no hace nada
+if az account show >/dev/null 2>&1; then
+    log_info "Ya existe una sesión activa en Azure CLI."
+else
+    # Abrirá el navegador para login interactivo
+    az login --use-device-code
+fi
+
+# Verificación
+if ! az account show >/dev/null 2>&1; then
+    log_error "No se pudo iniciar sesión en Azure CLI."
+    exit 1
+fi
+
+log_info "Sesión en Azure CLI iniciada correctamente."
+
+######################################
+# FIN
+######################################
+
+log_info "Entorno configurado correctamente."
+log_info "Ya puede ejecutar el despliegue."

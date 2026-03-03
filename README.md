@@ -17,6 +17,8 @@ Este proyecto tiene como objetivo el despliegue completamente automatizado de in
 
 ---
 
+Todo esto gestionado a través de un script interactivo en bash que es capaz de integrar ambas herramientas, Terraform y Ansible.
+
 ## Requisitos previos
 
 Antes de ejecutar el proyecto, asegúrate de tener instaladas y configuradas las siguientes herramientas:
@@ -41,21 +43,22 @@ Antes de ejecutar el proyecto, asegúrate de tener instaladas y configuradas las
 ### 1. Clonar el repositorio
 
 ```bash
+sudo apt uptade && sudo apt install -y git
 git clone https://github.com/OscarNFP/cp2.git
 cd cp2
 ```
 
 ### 2. Ejecutar menú interactivo
 
-- En el menú interactivo podremos elegir entre:
+- En el menú interactivo principal podremos elegir entre:
 > Instalar dependencias
-  Iniciar despliegue
-  Destruir intraestructura
-  Salir
+> Iniciar despliegue -> Aquí verás otro menú dónde puedes elegir entre: Desplegar infraestructura, Servicios, ambos o retroceder al menú principal
+> Destruir intraestructura
+> Salir
 
 ```bash
 cd scripts
-./start.sh
+./start
 ```
 
 ### Alternativamente, es posible desplegar toda la infraestructura lanzando los siguientes comandos de forma manual:

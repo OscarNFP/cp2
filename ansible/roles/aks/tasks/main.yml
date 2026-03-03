@@ -1,6 +1,14 @@
 #SPDX-License-Identifier: MIT-0
 ---
 # tasks file for roles/aks
+
+# Creo el directorio `.kube` dónde se almacenarán las credenciales
+- name: Creando directorio .kube si no existe...
+  ansible.builtin.file:
+    path: "{{ kubeconfig_dir }}"
+    state: directory
+    mode: '0700'
+
 # Obtengo las credenciales del clúster AKS y las guardo en un fichero temporal 
 # para su uso posterior con el módulo kubernetes.core.k8s
 - name: Obteniendo credenciales del clúster AKS...

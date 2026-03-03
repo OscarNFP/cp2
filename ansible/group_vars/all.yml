@@ -17,7 +17,8 @@ imagenes:
 ############################################
 resource_group: cp2ResourceGroup
 aks_name: tf-aks-casopractico2
-kubeconfig_path: ~/.kube/config
+kubeconfig_dir: "{{ ansible_env.HOME }}/.kube"
+kubeconfig_path: "{{ ansible_env.HOME }}/.kube/config"
 
 ############################################
 # Aplicación AKS

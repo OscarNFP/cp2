@@ -42,13 +42,33 @@ resource "azurerm_storage_account" "storage" {
     }
 }
 
+# Generación dinámica de la clave privada SSH
+resource "tls_private_key" "azure_ssh" {
+  algorithm = "RSA"
+  rsa_bits  = 4096
+}
+
+# Guardar clave privada y pública localmente
+resource "local_file" "private_key" {
+  content         = tls_private_key.azure_ssh.private_key_pem
+  filename        = "${var.ssh_private_key_path}"
+  file_permission = "0600"
+}
+
+resource "local_file" "public_key" {
+  content         = tls_private_key.azure_ssh.public_key_openssh
+  filename        = "${var.ssh_public_key_path}"
+  file_permission = "0644"
+}
+
+
 # Clave SSH gestionada por Azure
 resource "azurerm_ssh_public_key" "ssh" {
     name                = var.ssh_key_name
     resource_group_name = azurerm_resource_group.rg.name
     location            = azurerm_resource_group.rg.location
 
-    public_key = file(var.ssh_public_key_path)
+    public_key = tls_private_key.azure_ssh.public_key_openssh
 
     tags = {
         environment = var.environment

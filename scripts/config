@@ -1,0 +1,122 @@
+# -----------------------------------------------------------------------------------------------
+# File: config
+# Proyecto: Despliegue de Infraestructura en Azure con Terraform y Ansible
+# Descripción:
+#               En este fichero se almacenan las variables de entorno   
+#               que se ejecutarán por los scripts setup(instalación) y deploy (despliegue)
+# -----------------------------------------------------------------------------------------------
+
+# Directorio del entorno virtual
+VENV_DIR="/opt/azure-deploy-venv"
+
+# Directorio raíz del proyecto
+ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+
+# Directorio raíz Terraform
+TF_DIR="$ROOT_DIR/terraform"
+
+# Directorio raíz Ansible
+ANSIBLE_DIR="$ROOT_DIR/ansible"
+
+# Fichero de variables Terraform
+TF_VARS_FILE="$TF_DIR/vars.tf"
+
+# Fichero de secretos de Ansible
+ANSIBLE_SECRET_FILE="$ANSIBLE_DIR/secrets.yml"
+
+# Fichero de inventario - hosts
+ANSIBLE_INVENTORY_FILE="$ANSIBLE_DIR/inventory"
+
+# Fichero Playbook de Ansible - Este es el que ejecuta el despliegue
+ANSIBLE_PLAYBOOK_FILE="$ANSIBLE_DIR/playbook.yml"
+
+# Fichero de variables globales de Ansible
+ANSIBLE_GLOBAL_VARS="$ANSIBLE_DIR/group_vars/all.yml"
+
+# Binario de ejecución playbook para Ansible
+ANSIBLE_PLAYBOOK_BIN="$VENV_DIR/bin/ansible-playbook"
+
+# Binario de ejecución galaxy para Ansible
+ANSIBLE_GALAXY_BIN="$VENV_DIR/bin/ansible-galaxy"
+
+# Binario de ejecución Python en entorno virtual
+PYTHON_BIN="$VENV_DIR/bin/python"
+
+# Binario de ejecución de pip en entorno virtual
+PIP_BIN="$VENV_DIR/bin/pip"
+
+# Directorio de almacenamiento de llaves SSH
+SSH_DIR="$HOME/.ssh/unir/azure"
+
+# Ruta absoluta de llave privada SSH.
+export TF_VAR_ssh_private_key_path="$SSH_DIR/id_rsa_azure"
+
+# Ruta absoluta de llave pública SSH
+export TF_VAR_ssh_public_key_path="$SSH_DIR/id_rsa_azure.pub"
+
+# VERSION DE INSTALACIÓN DE ANSIBLE
+ANSIBLE_VERSION="9.3.0"
+
+# VERSIÓN DE INSTALACIÓN DEL KUBERNETES EN PYTHON
+KUBERNETES_PY_VERSION="29.0.0"
+
+# VERSIÓN DE AZURE SDK
+AZURE_SDK_VERSION="30.0.0"
+
+# Directorio absoluto del fichero authorized_keys - Valida las conexiones SSH
+AUTHTORIZED_KEYS_LOCAL="${HOME}/.ssh/authorized_keys"
+
+# Directorio absoluto del fichero known_hosts - Añade el host de conexión como válido
+KNOWN_HOSTS_LOCAL="${HOME}/.ssh/known_hosts"
+
+# Esta función es llamada desde los scripts setup y deploy
+# para limpiar el entorno una vez se termine 
+unset_sensitive_variables() {
+    # Variables de config.sh
+    unset VENV_DIR
+    unset ROOT_DIR
+    unset TF_DIR
+    unset ANSIBLE_DIR
+    unset TF_VARS_FILE
+    unset ANSIBLE_SECRET_FILE
+    unset ANSIBLE_INVENTORY_FILE
+    unset ANSIBLE_PLAYBOOK_FILE
+    unset ANSIBLE_GLOBAL_VARS
+    unset ANSIBLE_PLAYBOOK_BIN
+    unset ANSIBLE_GALAXY_BIN
+    unset PYTHON_BIN
+    unset PIP_BIN
+    unset SSH_DIR
+    unset TF_VAR_ssh_private_key_path
+    unset TF_VAR_ssh_public_key_path
+
+    # Variables de setup.sh
+    unset ANSIBLE_VERSION
+    unset KUBERNETES_PY_VERSION
+    unset AZURE_SDK_VERSION
+    unset PYTHON_VENV_BIN
+    unset AZCOLLECTION_REQUIREMENTS
+    unset DISTRO
+
+    # Variables de init_deploy.sh
+    unset AZ_SUBS_ID
+    unset ACR_LOGIN_SERVER
+    unset ACR_ADMIN_USERNAME
+    unset ACR_ADMIN_PASSWORD
+    unset VM_PUBLIC_IP
+    unset VM_ADMIN_USERNAME
+    unset VM_SSH_COMMAND
+    unset VM_WEB_URL
+    unset BASIC_USER_PASSWORD
+    unset CLUSTER_NAME
+    unset K8S_NAMESPACE
+    unset CL_IP
+    unset CL_PORT
+    unset FRONTEND_WEB_URL
+    unset AUTHTORIZED_KEYS_LOCAL
+    unset KNOWN_HOSTS_LOCAL
+
+    # Variables de start.sh
+    unset SCRIPT_DIR
+    unset option
+}
