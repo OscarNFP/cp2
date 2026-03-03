@@ -43,8 +43,8 @@ Antes de ejecutar el proyecto, asegúrate de tener instaladas y configuradas las
 ### 1. Clonar el repositorio
 
 ```bash
-sudo apt uptade && sudo apt install -y git
-git clone https://github.com/OscarNFP/cp2.git
+sudo apt uptade && sudo apt install -y git && \
+git clone https://github.com/OscarNFP/cp2.git && \
 cd cp2
 ```
 
