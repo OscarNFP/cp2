@@ -19,6 +19,9 @@
 
 set -euo pipefail
 
+# Pasamos como parámetro qué vamos a desplegar, estructura (usando Terraform), Servicio (usando Ansible) o ambas.
+deploy_option="${1:-}"
+
 #################################
 # BLOQUE ENTORNO PYTHON AISLADO #
 #################################
