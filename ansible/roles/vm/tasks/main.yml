@@ -9,7 +9,10 @@
 - name: Instalando Podman...
   become: yes
   ansible.builtin.apt:
-    name: podman
+    name: 
+      - podman
+      - openssl
+      - python3-passlib
     state: present
 
 - name: Creando usuario basico...
@@ -32,13 +35,80 @@
     tag: "{{ tag_imagen }}"
     pull: true
 
-- name: Creando directorio de volumen...
+- name: Creando directorio de volumen appdata...
   become: yes
   ansible.builtin.file:
-    path: /opt/appdata
+    path: "{{ nginx_volume_appdata }}"
     state: directory
-    owner: "{{ usuario_basico }}"
     mode: '0755'
+
+- name: Creando directorio de volumen nginx...
+  become: yes
+  ansible.builtin.file:
+    path: "{{ nginx_volume_parent }}"
+    state: directory
+    mode: '0755'
+
+- name: Creando directorio de volumen ssl...
+  become: yes
+  ansible.builtin.file:
+    path: "{{ nginx_volume_ssl }}"
+    state: directory
+    mode: '0755'
+
+- name: Creando directorio de volumen conf...
+  become: yes
+  ansible.builtin.file:
+    path: "{{ nginx_volume_conf }}"
+    state: directory
+    mode: '0755'
+
+- name: Generando clave privada SSL...
+  become: yes
+  community.crypto.openssl_privatekey:
+    path: "{{ nginx_volume_ssl }}/{{ nginx_cert_key }}"
+    size: 2048
+
+- name: Generando CSR con SAN...
+  become: yes
+  community.crypto.openssl_csr:
+    path: "{{ nginx_volume_ssl }}/{{ nginx_cert_csr }}"
+    privatekey_path: "{{ nginx_volume_ssl }}/{{ nginx_cert_key }}"
+    common_name: "{{ ansible_host }}"
+    organization_name: "{{ OrganizationNameCert }}"
+    subject_alt_name:
+      - "IP:{{ ansible_host }}"
+
+- name: Generando certificado autofirmado x.509...
+  become: yes
+  community.crypto.x509_certificate:
+    path: "{{ nginx_volume_ssl }}/{{ nginx_cert_crt }}"
+    privatekey_path: "{{ nginx_volume_ssl }}/{{ nginx_cert_key }}"
+    csr_path: "{{ nginx_volume_ssl }}/{{ nginx_cert_csr }}"
+    provider: selfsigned
+    selfsigned_digest: sha256
+
+- name: Creando fichero htpasswd...
+  become: yes
+  community.general.htpasswd:
+    path: "{{ nginx_volume_conf }}/.htpasswd"
+    name: "{{ usuario_basico }}"
+    password: "{{ password_basico }}"
+    mode: '0644'
+
+- name: Copiando configuración de nginx...
+  become: yes
+  ansible.builtin.template:
+    src: "{{ nginx_template_config }}"
+    dest: "{{ nginx_volume_conf }}/{{ nginx_destination_config }}"
+    mode: '0644'
+
+- name: Copiando página web personalizada...
+  become: yes
+  ansible.builtin.copy:
+    src: "{{ web_index_template }}"
+    dest: "{{ nginx_volume_appdata }}/{{ web_index_destination }}"
+    mode: '0644'
 
 - name: Arrancando contenedor con volumen...
   become: yes
@@ -48,8 +118,12 @@
     state: started
     ports:
       - "{{ nginx_port_host }}:{{ nginx_port_container }}"
+      - "{{ nginx_ssl_port_host }}:{{ nginx_ssl_port_container }}"
     volumes:
-      - "/opt/{{ nginx_volume }}:/data"
+      - "{{ nginx_volume_appdata }}:/usr/share/nginx/html:ro"
+      - "{{ nginx_volume_ssl }}:/etc/nginx/ssl:ro"
+      - "{{ nginx_volume_conf }}/{{ nginx_destination_config }}:/etc/nginx/conf.d/default.conf:ro"
+      - "{{ nginx_volume_conf }}/.htpasswd:/etc/nginx/.htpasswd:ro"
     recreate: yes
 
 - name: Reiniciando servicio del contenedor...

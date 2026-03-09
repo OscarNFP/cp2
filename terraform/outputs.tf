@@ -56,6 +56,12 @@ output "frontend_access_url" {
   value       = "http://${azurerm_public_ip.cp2publicip.ip_address}:${var.nsg_rule_destination_webport_vm}"
 }
 
+
+output "frontend_access_ssl_url" {
+  description = "URL para acceder a la aplicación frontend en la VM"
+  value       = "https://${azurerm_public_ip.cp2publicip.ip_address}"
+}
+
 ############################################
 # ACR Outputs
 ############################################

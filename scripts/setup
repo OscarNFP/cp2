@@ -166,7 +166,7 @@ fi
 ANSIBLE_GALAXY_BIN="$VENV_DIR/bin/ansible-galaxy"
 
 log_info "Instalando colecciones Ansible..."
-"$ANSIBLE_GALAXY_BIN" collection install azure.azcollection containers.podman
+"$ANSIBLE_GALAXY_BIN" collection install azure.azcollection containers.podman community.crypto community.general
 
 
 # Instalar las dependencias Python requeridas por azure.azcollection.

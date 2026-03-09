@@ -3,6 +3,21 @@ app_name: "nginx"
 tag_imagen: "casopractico2"
 nginx_port_host: 8086
 nginx_port_container: 80
+nginx_ssl_port_host: 443
+nginx_ssl_port_container: 443
+nginx_volume_appdata: "/opt/appdata"
+nginx_volume_parent: "/opt/nginx"
+nginx_volume_ssl: "/opt/nginx/ssl"
+nginx_volume_conf: "/opt/nginx/conf"
+nginx_cert_crt: "nginx.crt"
+nginx_cert_key: "nginx.key"
+nginx_cert_csr: "nginx.csr"
+OrganizationNameCert: "UNIR"
+nginx_template_config: "nginx.conf.j2"
+nginx_destination_config: "nginx.conf"
+web_index_template: "index.html"
+web_index_destination: "index.html"
+
 nginx_volume: "appdata"
 imagenes:
   - src: "docker.io/library/nginx:latest"

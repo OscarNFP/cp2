@@ -169,12 +169,17 @@ variable "nsg_rule_source_port" {
 
 variable "nsg_rule_destination_ports" {
     type    = list(string)
-    default = ["22", "8086"]
+    default = ["22", "8086", "443", "80"]
 }
 
 variable "nsg_rule_destination_webport_vm" {
     type    = string
     default = "8086"
+}
+
+variable "nsg_rule_destination_webport_ssl_vm" {
+    type    = string
+    default = "443"
 }
 
 variable "nsg_rule_source_prefix" {

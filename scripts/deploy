@@ -214,6 +214,9 @@ CLUSTER_NAME=$(extract_tf_output aks_cluster_name)
 K8S_NAMESPACE=$(grep 'namespace' $ANSIBLE_GLOBAL_VARS| awk '{print $2}')
 #log_info "K8S_NAMESPACE: $K8S_NAMESPACE"
 
+# Obtener el nombre del usuario básico
+BASIC_USER=$(grep 'usuario_basico' $ANSIBLE_SECRET_FILE| awk -F '\"' '{print $2}')
+
 # Generar una contraseña aleatoria para el usuario básico
 BASIC_USER_PASSWORD=$(head -c 100 /dev/urandom | tr -dc 'A-Za-z0-9@' | head -c 20 || true)
 
@@ -353,6 +356,10 @@ print_row ""
 print_row "  Kubernetes:"
 print_row "    Cluster:          $CLUSTER_NAME"
 print_row "    Acceso Web:       $FRONTEND_WEB_URL"
+print_row ""
+print_row "  Clave de acceso a la web:"
+print_row "    Usuario: $BASIC_USER"
+print_row "    Clave: $BASIC_USER_PASSWORD"
 print_row ""
 print_row "  Recuerda que puedes ver el ID de tu suscripcion de Azure"
 print_row "  con el siguiente comando: az account show --query 'id' -o tsv"
