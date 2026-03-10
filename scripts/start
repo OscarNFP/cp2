@@ -71,7 +71,11 @@ set_azid(){
 
 # Destruye la intraestructura completa
 destroy_infra(){
-    terraform -chdir=$TF_DIR destroy -auto-approve
+    local approve_flag="${1:-}"
+
+    if ! terraform -chdir=$TF_DIR destroy $approve_flag; then
+        echo "Error al destruir los recursos. Revise los errores indicados más arriba."
+    fi
 }
 
 # Recupera el fichero de variables por defecto de terraform
@@ -117,7 +121,18 @@ while true; do
                         echo ""
                         echo "Desplegando estructura con Terraform..."
                         set_vars
-                        bash "$SCRIPT_DIR/deploy" terraform
+                        while true; do
+                            read -rp "¿Aplicar cambios sin confirmación? [s/n]: " confirm
+                            if [[ "$confirm" == "s" ]]; then
+                                bash "$SCRIPT_DIR/deploy" terraform auto-approve
+                                break
+                            elif [[ "$confirm" == "n" ]]; then
+                                bash "$SCRIPT_DIR/deploy" terraform
+                                break
+                            else
+                                echo "Opción no válida. Por favor, introduce 's' o 'n'."
+                            fi
+                        done
                         read -rp "Pulsa Enter para continuar..."
                         break
                         ;;
@@ -153,7 +168,18 @@ while true; do
             set_vars
             backup_file
             set_azid
-            destroy_infra
+            while true; do
+            read -rp "¿Aplicar cambios sin confirmación? [s/n]: " confirm
+                if [[ "$confirm" == "s" ]]; then
+                    destroy_infra "-auto-approve"
+                    break
+                elif [[ "$confirm" == "n" ]]; then
+                    destroy_infra
+                    break
+                else
+                    echo "Opción no válida. Por favor, introduce 's' o 'n'."
+                fi
+            done
             rollback_config_files
             read -rp "Pulsa Enter para continuar..."
             ;;

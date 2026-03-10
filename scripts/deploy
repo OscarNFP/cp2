@@ -5,8 +5,8 @@
 # Autor: Óscar Nappo
 # Fecha de creación: 01/03/2026
 # Proyecto: Despliegue de Infraestructura en Azure con Terraform y Ansible
-# Versión: 1.3
-# Fecha última modificación: 03/03/2026
+# Versión: 1.4
+# Fecha última modificación: 10/03/2026
 # Descripción:
 #   Este script se encarga de preparar y desplegar una infraestructura
 #   utilizando Terraform para la estructura y Ansible para los servicios
@@ -21,6 +21,8 @@ set -euo pipefail
 
 # Pasamos como parámetro qué vamos a desplegar, estructura (usando Terraform), Servicio (usando Ansible) o ambas.
 deploy_option="${1:-}"
+# Paso como parámetro si quiero que terraform aplique los cambios sin preguntar
+auto_approve="${2:-}"
 
 #################################
 # BLOQUE ENTORNO PYTHON AISLADO #
@@ -67,7 +69,11 @@ log_notice() { log "NOTICE" "$@"; }
 
 # Despliegue de la infraestructura con Terraform
 deploy_terraform(){
-    if ! terraform -chdir=$TF_DIR init || ! terraform -chdir=$TF_DIR plan || ! terraform -chdir=$TF_DIR apply -auto-approve; then
+    local approve_flag=""
+    # Si el flag contiene auto_approve, se aplica sin confirmación
+    [[ "$auto_approve" == "auto-approve" ]] && approve_flag="-auto-approve"
+
+    if ! terraform -chdir=$TF_DIR init -upgrade|| ! terraform -chdir=$TF_DIR plan || ! terraform -chdir=$TF_DIR apply $approve_flag; then
         log_error "Error durante la ejecución de Terraform. Verifique los mensajes anteriores para más detalles."
         exit 1
     fi
@@ -104,6 +110,7 @@ replace_placeholder() {
 
 # Función para restaurar los archivos de configuración a su estado original en caso de error
 rollback_config_files() {
+    log_notice "Restaurando ficheros de variables por defecto y eliminando datos sensibles..."
     if [ -f "${TF_VARS_FILE}.template" ]; then
         mv "${TF_VARS_FILE}.template" "$TF_VARS_FILE"
         log_notice "Archivo de variables de Terraform restaurado a su estado original."
@@ -190,9 +197,26 @@ log_info "  Pública: $TF_VAR_ssh_public_key_path"
 # BLOQUE DESPLIEGUE INFREAESTRUCTURA - TERRAFORM #
 ##################################################
 
-if [[ "$deploy_option" == "terraform" || -z "$deploy_option" ]]; then
+if [[ "$deploy_option" == "terraform" ]]; then
+    deploy_terraform
+    log_info "Despliegue de Terraform completado correctamente."
+    exit 0
+elif [[ -z "$deploy_option" ]]; then
     deploy_terraform
 fi
+
+###################################################
+# BLOQUE COMPROBACIÓN DE DESPLIEGUE CON TERRAFORM #
+###################################################
+
+# Compruebo si ya se ha desplegado la infraestructura con Terraform.
+# Si no se ha desplegado la infraestructura con Terraform, Ansible
+# no podrá configurar los servicios y debo abortar.
+
+if ! is_terraform_deployed; then
+    log_error "No hay infraestructura de Terraform desplegada. Ejecuta primero el despliegue de Terraform."
+    exit 1
+fi 
 
 echo ""
 log_info "Extrayendo información de la infraestructura desplegada..."
@@ -207,6 +231,7 @@ VM_PUBLIC_IP=$(extract_tf_output public_ip_address)
 VM_ADMIN_USERNAME=$(extract_tf_output admin_username)
 VM_SSH_COMMAND=$(extract_tf_output ssh_connection_command)
 VM_WEB_URL=$(extract_tf_output frontend_access_url)
+VM_WEB_URL_SSL=$(extract_tf_output frontend_access_ssl_url)
 
 # Extracción de los datos del clúster
 CLUSTER_NAME=$(extract_tf_output aks_cluster_name)
@@ -290,10 +315,6 @@ fi
 ################################################
 
 if [[ "$deploy_option" == "ansible" || -z "$deploy_option" ]]; then
-    if ! is_terraform_deployed; then
-        log_error "No hay infraestructura de Terraform desplegada. Ejecuta primero el despliegue de Terraform."
-        exit 1
-    fi 
     deploy_ansible
 fi
 
@@ -348,6 +369,7 @@ print_row "    IP Publica:       $VM_PUBLIC_IP"
 print_row "    Usuario:          $VM_ADMIN_USERNAME"
 print_row "    Acceso SSH:       $VM_SSH_COMMAND"
 print_row "    Acceso Web:       $VM_WEB_URL"
+print_row "    Acceso Web SSL:   $VM_WEB_URL_SSL"
 print_row ""
 print_row "  ACR:"
 print_row "    Login Server:     $ACR_LOGIN_SERVER"

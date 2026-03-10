@@ -64,3 +64,9 @@ app:
     pv_size: 1Gi
     storage_class: managed-csi
     volumepath: /bitnami/redis/data
+    requests:
+      cpu: 100m
+      memory: 128Mi
+    limits:
+      cpu: 250m
+      memory: 256Mi

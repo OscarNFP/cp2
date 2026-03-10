@@ -30,9 +30,12 @@ resource "azurerm_kubernetes_cluster" "aks" {
   # }
 
   # Para versiones v2.x de Terraform Provider, se debe usar el bloque role_based_access_control
-  role_based_access_control {
-    enabled = true
-  }
+  #role_based_access_control {
+  #  enabled = true
+  #}
+
+  # En v3+ del provider azurerm se usa este atributo
+  role_based_access_control_enabled = true
 
   tags = {
     environment = var.environment

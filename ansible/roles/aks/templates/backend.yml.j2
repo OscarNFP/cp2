@@ -29,6 +29,14 @@ spec:
           # cada cambio que se haga.
           # Esto solo funciona para imágenes oficiales de Redis.
           #args: [ "--appendonly", "yes" ]
+          # Limito los recursos de backend para evitar sobrecargas
+          resources:
+            requests:
+              cpu: "{{ app.backend.requests.cpu }}"
+              memory: "{{ app.backend.requests.memory }}"
+            limits:
+              cpu: "{{ app.backend.limits.cpu }}"
+              memory: "{{ app.backend.limits.memory }}"
           env:
             - name: ALLOW_EMPTY_PASSWORD
               value: "yes"
