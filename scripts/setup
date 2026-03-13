@@ -131,7 +131,7 @@ log_info "Instalando passlib en el entorno virtual..."
 "$PIP_BIN" install --upgrade passlib
 
 # Verificación rápida de dependencias críticas
-for module in ansible azure.identity kubernetes passlib; do
+for module in ansible kubernetes passlib; do
     if ! "$PYTHON_VENV_BIN" -c "import $module" >/dev/null 2>&1; then
         log_error "El módulo Python '$module' NO se instaló correctamente en el venv."
         exit 1
@@ -199,7 +199,7 @@ do
     fi
 done
 
-for module in azure.mgmt.containerservice kubernetes; do
+for module in azure.identity azure.mgmt.containerservice kubernetes passlib; do
     if ! "$PYTHON_VENV_BIN" -c "import $module" >/dev/null 2>&1; then
         log_error "Módulo Python no disponible: $module"
         exit 1
