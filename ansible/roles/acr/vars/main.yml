@@ -1,0 +1,13 @@
+---
+# Aquí se declaran las variables que usaremos para la creación
+# de todos los servicios en el rol de acr
+
+tag_imagen: "casopractico2"
+
+imagenes:
+  - src: "docker.io/library/nginx:latest"
+    dst: "nginx"
+  - src: "docker.io/bitnami/redis:latest"
+    dst: "redis"
+  - src: "docker.io/suhuruli/azure-vote-front:latest"
+    dst: "azure-vote-front"

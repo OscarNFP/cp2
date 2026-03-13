@@ -30,8 +30,8 @@ ANSIBLE_INVENTORY_FILE="$ANSIBLE_DIR/inventory"
 # Fichero Playbook de Ansible - Este es el que ejecuta el despliegue
 ANSIBLE_PLAYBOOK_FILE="$ANSIBLE_DIR/playbook.yml"
 
-# Fichero de variables globales de Ansible
-ANSIBLE_GLOBAL_VARS="$ANSIBLE_DIR/group_vars/all.yml"
+# Fichero de variables del AKS
+ANSIBLE_AKS_VARS="$ANSIBLE_DIR/roles/aks/vars/main.yml"
 
 # Binario de ejecución playbook para Ansible
 ANSIBLE_PLAYBOOK_BIN="$VENV_DIR/bin/ansible-playbook"
@@ -72,7 +72,7 @@ KNOWN_HOSTS_LOCAL="${HOME}/.ssh/known_hosts"
 # Esta función es llamada desde los scripts setup y deploy
 # para limpiar el entorno una vez se termine 
 unset_sensitive_variables() {
-    # Variables de config.sh
+    # Variables de config
     unset VENV_DIR
     unset ROOT_DIR
     unset TF_DIR
@@ -81,7 +81,7 @@ unset_sensitive_variables() {
     unset ANSIBLE_SECRET_FILE
     unset ANSIBLE_INVENTORY_FILE
     unset ANSIBLE_PLAYBOOK_FILE
-    unset ANSIBLE_GLOBAL_VARS
+    unset ANSIBLE_AKS_VARS
     unset ANSIBLE_PLAYBOOK_BIN
     unset ANSIBLE_GALAXY_BIN
     unset PYTHON_BIN
@@ -89,16 +89,16 @@ unset_sensitive_variables() {
     unset SSH_DIR
     unset TF_VAR_ssh_private_key_path
     unset TF_VAR_ssh_public_key_path
-
-    # Variables de setup.sh
+    # Variables de setup
     unset ANSIBLE_VERSION
     unset KUBERNETES_PY_VERSION
     unset AZURE_SDK_VERSION
     unset PYTHON_VENV_BIN
     unset AZCOLLECTION_REQUIREMENTS
     unset DISTRO
-
-    # Variables de init_deploy.sh
+    # Variables de deploy
+    unset deploy_option
+    unset auto_approve
     unset AZ_SUBS_ID
     unset ACR_LOGIN_SERVER
     unset ACR_ADMIN_USERNAME
@@ -115,8 +115,7 @@ unset_sensitive_variables() {
     unset FRONTEND_WEB_URL
     unset AUTHTORIZED_KEYS_LOCAL
     unset KNOWN_HOSTS_LOCAL
-
-    # Variables de start.sh
+    # Variables de start
     unset SCRIPT_DIR
     unset option
 }

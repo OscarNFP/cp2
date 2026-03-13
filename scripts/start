@@ -5,7 +5,8 @@
 # Autor: Óscar Nappo
 # Fecha de creación: 01/03/2026
 # Proyecto: Despliegue de Infraestructura en Azure con Terraform y Ansible
-# Versión: 1.0
+# Versión: 1.4
+# Fecha última modificación: 13/03/2026
 # Descripción:
 #   Este script muestra un menú interactivo para gestionar el despliegue
 #   de la infraestructura en Azure.
@@ -18,13 +19,15 @@
 # Muestra un menú interactivo
 show_menu() {
     echo "+--------------------------------------------------+"
-    echo "+   Despliegue de Infraestructura en Azure         +"
+    echo "+  ¡Bienvenid@ al menú interactivo del CP2!        +"
+    echo "+                                                  +"
+    echo "+    Elige una de las siguientes opciones:         +"
     echo "+--------------------------------------------------+"
     echo "+                                                  +"
     echo "+   0. Salir                                       +"
-    echo "+   1. Instalar dependencias                       +"
-    echo "+   2. Iniciar despliegue                          +"
-    echo "+   3. Destruir infraestructura                    +"
+    echo "+   1. Instalar Dependencias                       +"
+    echo "+   2. Iniciar Despliegue                          +"
+    echo "+   3. Destruir Infraestructura                    +"
     echo "+                                                  +"
     echo "+--------------------------------------------------+"
     echo ""
@@ -36,10 +39,10 @@ show_deploy_menu() {
     echo "+   Seleccione qué quiere despliegar               +"
     echo "+--------------------------------------------------+"
     echo "+                                                  +"
-    echo "+   0. Retroceder                                  +"
-    echo "+   1. Desplegar estructura [terraform]            +"
-    echo "+   2. Desplegar servicios [ansible]               +"
-    echo "+   3. Desplegar todo [terraform + ansible]        +"
+    echo "+   0. Retroceder al Menú Principal                +"
+    echo "+   1. Desplegar Infraestructura [Terraform]       +"
+    echo "+   2. Desplegar Servicios [Ansible]               +"
+    echo "+   3. Desplegar Todo [Terraform + Ansible]        +"
     echo "+                                                  +"
     echo "+--------------------------------------------------+"
     echo ""
@@ -150,7 +153,18 @@ while true; do
                         echo ""
                         echo "Desplegando infraestructura y servicios Terraform + Ansible..."
                         set_vars
-                        bash "$SCRIPT_DIR/deploy"
+                        while true; do
+                            read -rp "¿Aplicar cambios sin confirmación? [s/n]: " confirm
+                            if [[ "$confirm" == "s" ]]; then
+                                bash "$SCRIPT_DIR/deploy" all auto-approve
+                                break
+                            elif [[ "$confirm" == "n" ]]; then
+                                bash "$SCRIPT_DIR/deploy" all
+                                break
+                            else
+                                echo "Opción no válida. Por favor, introduce 's' o 'n'."
+                            fi
+                        done
                         read -rp "Pulsa Enter para continuar..."
                         break
                         ;;

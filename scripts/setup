@@ -2,9 +2,14 @@
 
 # ------------------------------------------------------------------------------
 # Script: setup
+# Autor: Óscar Nappo
+# Fecha de creación: 01/03/2026
 # Proyecto: Despliegue de Infraestructura en Azure con Terraform y Ansible
+# Versión: 1.4
+# Fecha última modificación: 13/03/2026
 # Descripción:
-#   Prepara entorno Python aislado para ejecutar deploy
+#   Preparar entorno Python aislado con todas las dependencias para ejecutar el
+#   deploy
 # ------------------------------------------------------------------------------
 
 set -euo pipefail
@@ -113,31 +118,20 @@ log_info "Actualizando pip..."
 # INSTALACIÓN DEPENDENCIAS PYTHON
 ######################################
 
-log_info "Instalando Ansible..."
-#"$PIP_BIN" install "ansible==$ANSIBLE_VERSION"
-"$PIP_BIN" install ansible
-
 log_info "Instalando soporte Azure..."
 #"$PIP_BIN" install "ansible[azure]==$ANSIBLE_VERSION"
 "$PIP_BIN" install --upgrade "ansible[azure]"
 
-log_info "Instalando dependencias de azure..."
-#"$PIP_BIN" install "azure-mgmt-containerservice==$AZURE_SDK_VERSION"
-"$PIP_BIN" install --upgrade azure-cli-core azure-common azure-mgmt-authorization azure-mgmt-resource azure-mgmt-compute azure-mgmt-network azure-mgmt-containerservice msrest msrestazure azure-identity
-
 log_info "Instalando cliente Kubernetes..."
 #"$PIP_BIN" install "kubernetes==$KUBERNETES_PY_VERSION"
 "$PIP_BIN" install --upgrade kubernetes
-
-log_info "Instalando dependencias Python necesarias para AKS..."
-"$PIP_BIN" install --upgrade packaging
 
 # Instalación de la librería lasslib para soportar password_hash
 log_info "Instalando passlib en el entorno virtual..."
 "$PIP_BIN" install --upgrade passlib
 
 # Verificación rápida de dependencias críticas
-for module in ansible azure.identity azure.mgmt.containerservice kubernetes passlib packaging; do
+for module in ansible azure.identity kubernetes passlib; do
     if ! "$PYTHON_VENV_BIN" -c "import $module" >/dev/null 2>&1; then
         log_error "El módulo Python '$module' NO se instaló correctamente en el venv."
         exit 1
@@ -166,7 +160,7 @@ fi
 ANSIBLE_GALAXY_BIN="$VENV_DIR/bin/ansible-galaxy"
 
 log_info "Instalando colecciones Ansible..."
-"$ANSIBLE_GALAXY_BIN" collection install azure.azcollection containers.podman community.crypto community.general
+"$ANSIBLE_GALAXY_BIN" collection install azure.azcollection containers.podman community.crypto community.general kubernetes.core
 
 
 # Instalar las dependencias Python requeridas por azure.azcollection.

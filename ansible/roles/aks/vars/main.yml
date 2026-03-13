@@ -1,0 +1,61 @@
+---
+
+# Aquí se declaran las variables que usaremos para la creación
+# de todos los servicios en el rol de aks
+
+############################################
+# TAG Imágenes ACR
+############################################
+tag_imagen: "casopractico2"
+
+############################################
+# Azure / AKS
+############################################
+resource_group: cp2ResourceGroup
+aks_name: tf-aks-casopractico2
+kubeconfig_dir: "{{ ansible_env.HOME }}/.kube"
+kubeconfig_path: "{{ ansible_env.HOME }}/.kube/config"
+
+
+############################################
+# Aplicación AKS
+############################################
+app_namespace: namespace-aks-cp2
+
+app:
+  frontend:
+    nodeselector_kubernetes_os: linux
+    name: frontend
+    image: "{{ acr_url }}/azure-vote-front:{{ tag_imagen }}"
+    replicas: 1
+    requests:
+      cpu: 100m
+      memory: 128Mi
+    limits:
+      cpu: 250m
+      memory: 256Mi
+    port: 80
+    external_port: 8080
+    env_name: "REDIS"
+    env_value: "backend"
+    service_type: LoadBalancer
+  backend:
+    nodeselector_kubernetes_os: linux
+    name: backend
+    image: "{{ acr_url }}/redis:{{ tag_imagen }}"
+    replicas: 1
+    port: 6379
+    port_name: redis
+    pv: redis-data
+    pvc: redis-pvc
+    pv_size: 1Gi
+    storage_class: managed-csi
+    volumepath: /bitnami/redis/data
+    requests:
+      cpu: 100m
+      memory: 128Mi
+    limits:
+      cpu: 250m
+      memory: 256Mi
+    env_name: "ALLOW_EMPTY_PASSWORD"
+    env_value: "yes"

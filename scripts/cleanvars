@@ -1,0 +1,48 @@
+#!/bin/bash
+
+# Variables de config
+unset VENV_DIR
+unset ROOT_DIR
+unset TF_DIR
+unset ANSIBLE_DIR
+unset TF_VARS_FILE
+unset ANSIBLE_SECRET_FILE
+unset ANSIBLE_INVENTORY_FILE
+unset ANSIBLE_PLAYBOOK_FILE
+unset ANSIBLE_AKS_VARS
+unset ANSIBLE_PLAYBOOK_BIN
+unset ANSIBLE_GALAXY_BIN
+unset PYTHON_BIN
+unset PIP_BIN
+unset SSH_DIR
+unset TF_VAR_ssh_private_key_path
+unset TF_VAR_ssh_public_key_path
+# Variables de setup
+unset ANSIBLE_VERSION
+unset KUBERNETES_PY_VERSION
+unset AZURE_SDK_VERSION
+unset PYTHON_VENV_BIN
+unset AZCOLLECTION_REQUIREMENTS
+unset DISTRO
+# Variables de deploy
+unset deploy_option
+unset auto_approve
+unset AZ_SUBS_ID
+unset ACR_LOGIN_SERVER
+unset ACR_ADMIN_USERNAME
+unset ACR_ADMIN_PASSWORD
+unset VM_PUBLIC_IP
+unset VM_ADMIN_USERNAME
+unset VM_SSH_COMMAND
+unset VM_WEB_URL
+unset BASIC_USER_PASSWORD
+unset CLUSTER_NAME
+unset K8S_NAMESPACE
+unset CL_IP
+unset CL_PORT
+unset FRONTEND_WEB_URL
+unset AUTHTORIZED_KEYS_LOCAL
+unset KNOWN_HOSTS_LOCAL
+# Variables de start
+unset SCRIPT_DIR
+unset option

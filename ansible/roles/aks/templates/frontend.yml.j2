@@ -21,7 +21,7 @@ spec:
         app: "{{ app.frontend.name }}"
     spec:
       nodeSelector:
-        kubernetes.io/os: linux
+        kubernetes.io/os: "{{ app.frontend.nodeselector_kubernetes_os }}"
       containers:
         - name: "{{ app.frontend.name }}"
           image: "{{ app.frontend.image }}"
@@ -35,8 +35,8 @@ spec:
           ports:
             - containerPort: {{ app.frontend.port }}
           env:
-            - name: REDIS
-              value: "{{ app.frontend.redis_env }}"
+            - name: "{{ app.frontend.env_name }}"
+              value: "{{ app.frontend.env_value }}"
 ---
 # Service LoadBalancer del frontend
 apiVersion: v1
@@ -45,7 +45,7 @@ metadata:
   name: "{{ app.frontend.name }}"
   namespace: "{{ app_namespace }}"
 spec:
-  type: LoadBalancer
+  type: "{{ app.frontend.service_type }}"
   ports:
     - port: {{ app.frontend.external_port }}
       targetPort: {{ app.frontend.port }}

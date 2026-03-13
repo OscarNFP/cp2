@@ -6,7 +6,7 @@
 # Fecha de creación: 01/03/2026
 # Proyecto: Despliegue de Infraestructura en Azure con Terraform y Ansible
 # Versión: 1.4
-# Fecha última modificación: 10/03/2026
+# Fecha última modificación: 13/03/2026
 # Descripción:
 #   Este script se encarga de preparar y desplegar una infraestructura
 #   utilizando Terraform para la estructura y Ansible para los servicios
@@ -201,7 +201,7 @@ if [[ "$deploy_option" == "terraform" ]]; then
     deploy_terraform
     log_info "Despliegue de Terraform completado correctamente."
     exit 0
-elif [[ -z "$deploy_option" ]]; then
+elif [[ "$deploy_option" == "all" || -z "$deploy_option" ]]; then
     deploy_terraform
 fi
 
@@ -235,9 +235,7 @@ VM_WEB_URL_SSL=$(extract_tf_output frontend_access_ssl_url)
 
 # Extracción de los datos del clúster
 CLUSTER_NAME=$(extract_tf_output aks_cluster_name)
-#log_info "CLUSTER_NAME: $CLUSTER_NAME"
-K8S_NAMESPACE=$(grep 'namespace' $ANSIBLE_GLOBAL_VARS| awk '{print $2}')
-#log_info "K8S_NAMESPACE: $K8S_NAMESPACE"
+K8S_NAMESPACE=$(grep '^app_namespace:' $ANSIBLE_AKS_VARS| awk '{print $2}')
 
 # Obtener el nombre del usuario básico
 BASIC_USER=$(grep 'usuario_basico' $ANSIBLE_SECRET_FILE| awk -F '\"' '{print $2}')
@@ -314,7 +312,7 @@ fi
 # BLOQUE DESPLIEGUE INFREAESTRUCTURA - ANSIBLE #
 ################################################
 
-if [[ "$deploy_option" == "ansible" || -z "$deploy_option" ]]; then
+if [[ "$deploy_option" == "ansible" || "$deploy_option" == "all" || -z "$deploy_option" ]]; then
     deploy_ansible
 fi
 
@@ -327,7 +325,7 @@ fi
 # Se ejecuta en bucle porque puede tardar en obtener la IP
 # Una vez que la obtiene, continúa.
 
-log_info "Obteniendo IP externa del servicio fronted..."
+log_info "Obteniendo IP externa del servicio frontend..."
 CL_IP=""
 RETRIES=0
 MAX_RETRIES=10
@@ -380,8 +378,8 @@ print_row "    Cluster:          $CLUSTER_NAME"
 print_row "    Acceso Web:       $FRONTEND_WEB_URL"
 print_row ""
 print_row "  Clave de acceso a la web:"
-print_row "    Usuario: $BASIC_USER"
-print_row "    Clave: $BASIC_USER_PASSWORD"
+print_row "    Usuario:          $BASIC_USER"
+print_row "    Clave:            $BASIC_USER_PASSWORD"
 print_row ""
 print_row "  Recuerda que puedes ver el ID de tu suscripcion de Azure"
 print_row "  con el siguiente comando: az account show --query 'id' -o tsv"

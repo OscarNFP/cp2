@@ -22,13 +22,11 @@ spec:
       # es necesario configurar el securityContext del Pod con un fsGroup que tenga permisos de escritura en el volumen.
       securityContext:
         fsGroup: 1001
+      nodeSelector:
+        kubernetes.io/os: "{{ app.frontend.nodeselector_kubernetes_os }}"     
       containers:
         - name: "{{ app.backend.name }}"
           image: "{{ app.backend.image }}"
-          # Con estos argumentos conseguimos que Redis escriba en el volumen persistente
-          # cada cambio que se haga.
-          # Esto solo funciona para imágenes oficiales de Redis.
-          #args: [ "--appendonly", "yes" ]
           # Limito los recursos de backend para evitar sobrecargas
           resources:
             requests:
@@ -38,12 +36,8 @@ spec:
               cpu: "{{ app.backend.limits.cpu }}"
               memory: "{{ app.backend.limits.memory }}"
           env:
-            - name: ALLOW_EMPTY_PASSWORD
-              value: "yes"
-            # Con esta variable de entorno habilitamos el modo AOF (Append Only File) de Redis
-            # que hace que cada cambio se escriba en un fichero en el volumen persistente.
-            #- name: REDIS_AOF_ENABLED
-            #  value: "yes"
+            - name: "{{ app.backend.env_name }}"
+              value: "{{ app.backend.env_value }}"
           ports:
             - containerPort: {{ app.backend.port }}
               name: {{ app.backend.port_name }}
@@ -53,7 +47,7 @@ spec:
       volumes:
         - name: "{{ app.backend.pv }}"
           persistentVolumeClaim:
-            claimName: "{{ app.backend.pv }}"
+            claimName: "{{ app.backend.pvc }}"
 ---
 # Service interno del backend
 apiVersion: v1
