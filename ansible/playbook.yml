@@ -1,3 +1,8 @@
+# Este es el playbook principal. Sobre este playbook se van ejecutando
+# tareas de los distintos roles existentes: ACR, VM, AKS
+# Nótese que ACR y AKS se ejecutan en localhost, mientras
+# que VM se ejecuta sobre un host almacenado en el inventario
+
 ---
 - name: Configurar ACR
   hosts: localhost

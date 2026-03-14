@@ -1,6 +1,7 @@
-#SPDX-License-Identifier: MIT-0
+# SPDX-License-Identifier: MIT-0
+# En este fichero declaramos las tareas que ejecutará ansible para el role
+# del acr
 ---
-# tasks file for roles/acr
 - name: Conectándo a ACR...
   containers.podman.podman_login:
     registry: "{{ acr_url }}"

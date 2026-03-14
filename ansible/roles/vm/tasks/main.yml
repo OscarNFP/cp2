@@ -1,5 +1,6 @@
 #SPDX-License-Identifier: MIT-0
-# tasks file for roles/vm
+# Aquí se declaran las tareas que ejecutará Ansible para 
+# el rol de vm
 ---
 - name: Actualizando listado de repositorios...
   become: yes
@@ -15,6 +16,7 @@
       - python3-passlib
     state: present
 
+# Se Creará un usuario con autenticación básica para acceso a la página web
 - name: Creando usuario basico...
   become: yes
   ansible.builtin.user:
@@ -35,6 +37,9 @@
     tag: "{{ tag_imagen }}"
     pull: true
 
+# Es necesario crear un directorio en /opt para poder crear un volumen
+# de cara a customizar el contenedor de nginx con la página web personalizada,
+# certificado autofirmado y método de autenticación
 - name: Creando directorio de volumen appdata...
   become: yes
   ansible.builtin.file:
@@ -42,12 +47,17 @@
     state: directory
     mode: '0755'
 
+# Sobre el diretorio raíz anterior, vamos a montar subdirectorios para dividir
+# cada servicio personalizado.
 - name: Creando directorio de volumen nginx...
   become: yes
   ansible.builtin.file:
     path: "{{ nginx_volume_parent }}"
     state: directory
     mode: '0755'
+
+# Sobre el diretorio raíz anterior, vamos a montar subdirectorios para dividir
+# cada servicio personalizado. Aquí se añadirán los certificados autofirmados.
 
 - name: Creando directorio de volumen ssl...
   become: yes
@@ -56,6 +66,9 @@
     state: directory
     mode: '0755'
 
+# Sobre el diretorio raíz anterior, vamos a montar subdirectorios para dividir
+# cada servicio personalizado. Aquí se añadirá la configuración de redireccionamiento
+# al puerto 443 y reglas de autenticación
 - name: Creando directorio de volumen conf...
   become: yes
   ansible.builtin.file:
@@ -63,12 +76,17 @@
     state: directory
     mode: '0755'
 
+# Aquí generamos la clave privada para el certificado autofirmado
 - name: Generando clave privada SSL...
   become: yes
   community.crypto.openssl_privatekey:
     path: "{{ nginx_volume_ssl }}/{{ nginx_cert_key }}"
     size: 2048
 
+# Aquí generamos el certificado CSR a partir de la clave privada. Aquí se almacenan
+# los datos de la entidad certificadora, origen, autor, organización... 
+# Tamién se configura con un identificados SAN, los navegadores actuales necesitan este identificador
+# para permitir acceder a ese dominio/IP autofirmado
 - name: Generando CSR con SAN...
   become: yes
   community.crypto.openssl_csr:
@@ -79,6 +97,8 @@
     subject_alt_name:
       - "IP:{{ ansible_host }}"
 
+# Aquí se genera el certificado autofirmado en base a los 
+# ficheros previos generados
 - name: Generando certificado autofirmado x.509...
   become: yes
   community.crypto.x509_certificate:
@@ -88,6 +108,8 @@
     provider: selfsigned
     selfsigned_digest: sha256
 
+# Generamos un fichero de configuración para el método de autenticación
+# básica con usuario y clave del usuario creado previamente.
 - name: Creando fichero htpasswd...
   become: yes
   community.general.htpasswd:
@@ -96,6 +118,7 @@
     password: "{{ password_basico }}"
     mode: '0644'
 
+# Copiamos la configuración de autenticación básica al contenedor.
 - name: Copiando configuración de nginx...
   become: yes
   ansible.builtin.template:
@@ -103,6 +126,7 @@
     dest: "{{ nginx_volume_conf }}/{{ nginx_destination_config }}"
     mode: '0644'
 
+# Copiamos fichero index.html de la web personalizada
 - name: Copiando página web personalizada...
   become: yes
   ansible.builtin.copy:
@@ -110,6 +134,9 @@
     dest: "{{ nginx_volume_appdata }}/{{ web_index_destination }}"
     mode: '0644'
 
+# Iniciamos el contenedor con la imagen seleccionada y la apertura
+# de puertos y asignación de volúmenes para los datos/configuraciones
+# personalizadas aplicadas.
 - name: Arrancando contenedor con volumen...
   become: yes
   containers.podman.podman_container:
@@ -126,6 +153,8 @@
       - "{{ nginx_volume_conf }}/.htpasswd:/etc/nginx/.htpasswd:ro"
     recreate: yes
 
+# Prueba de reinicio manual e inicial tras construcción para verificar que los datos siguen ahí
+# y la página web funciona.
 - name: Reiniciando servicio del contenedor...
   become: yes
   containers.podman.podman_container:

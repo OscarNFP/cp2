@@ -20,14 +20,15 @@ resource "azurerm_kubernetes_cluster" "aks" {
   identity {
     type = var.aks_identity_type # "SystemAssigned" | "UserAssigned"
   }
-  # Este atributo se usaba en versiones anteriores a v2.x
-  # role_based_access_control_enabled = true
   
   # En caso de usar un service_principal para la identidad, se debe agregar el bloque service_principal
   # service_principal {
   #   client_id     = var.aks_sp_client_id
   #   client_secret = var.aks_sp_client_secret
   # }
+  
+  # Este atributo se usaba en versiones anteriores a v2.x
+  # role_based_access_control_enabled = true
 
   # Para versiones v2.x de Terraform Provider, se debe usar el bloque role_based_access_control
   #role_based_access_control {

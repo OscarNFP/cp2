@@ -1,4 +1,11 @@
 #!/bin/bash
+# -----------------------------------------------------------------------------------------------
+# File: cleanvars
+# Proyecto: Despliegue de Infraestructura en Azure con Terraform y Ansible
+# Descripción:
+#                  Aquí se liberan todas las variables usadas durante el proceso de instalación
+#                  Este fichero es llamado exclusivamente si se decide desplegar de forma manual
+# -----------------------------------------------------------------------------------------------
 
 # Variables de config
 unset VENV_DIR

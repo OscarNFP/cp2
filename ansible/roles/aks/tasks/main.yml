@@ -1,6 +1,7 @@
-#SPDX-License-Identifier: MIT-0
+# SPDX-License-Identifier: MIT-0
+# En este fichero declaramos las tareas que ejecutará ansible para el role
+# del aks
 ---
-# tasks file for roles/aks
 
 # Creo el directorio `.kube` dónde se almacenarán las credenciales
 - name: Creando directorio .kube si no existe...
@@ -33,21 +34,25 @@
     kind: Namespace
     state: present
 
+# El secreto que será creado es para que se pueda hacer pull de las imágenes almacenas en el ACR
 - name: Creando secreto para acceso al ACR...
   kubernetes.core.k8s:
     definition: "{{ lookup('template', 'acr_secrets.yml.j2') }}"
     state: present
 
+# PVC es un espacio persistente (Volumen) para que los datos no desaparezcan en caso de reinicio o eliminación del pod
 - name: Creando PersistentVolumeClaim...
   kubernetes.core.k8s:
     definition: "{{ lookup('template', 'persistentvolumeclaim.yml.j2') }}"
     state: present
 
+# Despliegue del servicio backend usando un template almacenado en el directorio templates
 - name: Desplegando backend...
   kubernetes.core.k8s:
     definition: "{{ lookup('template', 'backend.yml.j2') }}"
     state: present
 
+# Despliegue del servicio frontend usando un template almacenado en el directorio templates
 - name: Desplegando frontend...
   kubernetes.core.k8s:
     definition: "{{ lookup('template', 'frontend.yml.j2') }}"

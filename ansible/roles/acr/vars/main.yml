@@ -1,6 +1,6 @@
----
 # Aquí se declaran las variables que usaremos para la creación
 # de todos los servicios en el rol de acr
+---
 
 tag_imagen: "casopractico2"
 
