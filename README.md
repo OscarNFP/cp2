@@ -173,6 +173,7 @@ cd cp2
 2. Configurar Subscription ID obtenido del az login en `vars.tf`:
 
 ```bash
+source scripts/config
 cp $TF_VARS_FILE $TF_VARS_FILE.template
 AZ_SUBS_ID=$(az account show --query "id" -o tsv)
 sed -i'' "s|AZ_SUBS_ID|$AZ_SUBS_ID|g" $TF_VARS_FILE
