@@ -217,14 +217,17 @@ Una vez desplegada la infraestructura con Terraform, Ansible se encarga de:
 Edita el fichero ansible/secrets.yml sustituyendo los placeholders por los valores obtenidos:
 
 ```bash
+# Copia de seguridad del fichero
 cp $ANSIBLE_SECRET_FILE $ANSIBLE_SECRET_FILE.template
 
+# Obtengo los valores y las almaceno en variables
 ACR_LOGIN_SERVER=$(terraform -chdir=$TF_DIR output -raw acr_login_server)
 ACR_ADMIN_USERNAME=$(terraform -chdir=$TF_DIR output -raw acr_admin_username)
 ACR_ADMIN_PASSWORD=$(terraform -chdir=$TF_DIR output -raw acr_admin_password)
 BASIC_USER=$(grep 'usuario_basico' $ANSIBLE_SECRET_FILE| awk -F '\"' '{print $2}')
 BASIC_USER_PASSWORD=$(head -c 100 /dev/urandom | tr -dc 'A-Za-z0-9@' | head -c 20)
 
+# Reemplazo los valores con placeholders
 sed -i'' "s|ACR_LOGIN_SERVER|$ACR_LOGIN_SERVER|g" $ANSIBLE_SECRET_FILE
 sed -i'' "s|ACR_ADMIN_USERNAME|$ACR_ADMIN_USERNAME|g" $ANSIBLE_SECRET_FILE
 sed -i'' "s|ACR_ADMIN_PASSWORD|$ACR_ADMIN_PASSWORD|g" $ANSIBLE_SECRET_FILE
@@ -236,20 +239,25 @@ sed -i'' "s|BASIC_USER_PASSWORD|$BASIC_USER_PASSWORD|g" $ANSIBLE_SECRET_FILE
 Edita el fichero ansible/inventory sustituyendo los placeholders por los valores obtenidos:
 
 ```bash
+# Copia de seguridad del fichero
 cp $ANSIBLE_INVENTORY_FILE $ANSIBLE_INVENTORY_FILE.template
 
+# Obtengo los valores y las almaceno en variables
 VM_ADMIN_USERNAME=$(terraform -chdir=$TF_DIR output -raw admin_username)
 VM_PUBLIC_IP=$(terraform -chdir=$TF_DIR output -raw public_ip_address)
 
+# Reemplazo los valores con placeholders
 sed -i'' "s|VM_USER|$VM_ADMIN_USERNAME|g" $ANSIBLE_INVENTORY_FILE
 sed -i'' "s|VM_PUBLIC_IP|$VM_PUBLIC_IP|g" $ANSIBLE_INVENTORY_FILE
 
+# Inserto en known_host la IP de la VM para autenticación SSH sin errores
 ssh-keyscan -H "$VM_PUBLIC_IP" >> $KNOWN_HOSTS_LOCAL 2>&1
 ```
 
 3. Obtener datos de acceso:
 
 ```bash
+# Obtengo los valores y las almaceno en variables
 VM_SSH_COMMAND=$(terraform -chdir=$TF_DIR output -raw ssh_connection_command)
 VM_WEB_URL_SSL=$(terraform -chdir=$TF_DIR output -raw frontend_access_ssl_url)
 CLUSTER_NAME=$(terraform -chdir=$TF_DIR output -raw aks_cluster_name)
@@ -288,6 +296,7 @@ $ANSIBLE_PLAYBOOK_BIN -i $ANSIBLE_INVENTORY_FILE $ANSIBLE_PLAYBOOK_FILE --ask-va
 6. Obtener los datos del clúster:
 
 ```bash
+# Obtengo los valores y las almaceno en variables
 CL_IP=$(kubectl get service frontend -n $K8S_NAMESPACE -o jsonpath='{.status.loadBalancer.ingress[0].ip}')
 CL_PORT=$(kubectl get service frontend -n $K8S_NAMESPACE -o jsonpath='{.spec.ports[0].port}')
 FRONTEND_WEB_URL="http://$CL_IP:$CL_PORT"
@@ -295,6 +304,7 @@ FRONTEND_WEB_URL="http://$CL_IP:$CL_PORT"
 
 7. Muestra los resultados:
 ```bash
+# Muestro los valores por pantalla
 echo "  VM:"
 echo "    Acceso SSH:       $VM_SSH_COMMAND"
 echo "    Acceso Web SSL:   $VM_WEB_URL_SSL"
