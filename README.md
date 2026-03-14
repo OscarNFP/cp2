@@ -238,11 +238,9 @@ Edita el fichero ansible/inventory sustituyendo los placeholders por los valores
 ```bash
 cp $ANSIBLE_INVENTORY_FILE $ANSIBLE_INVENTORY_FILE.template
 
-ACRNAME=$(terraform -chdir=$TF_DIR output -raw acr_admin_username)
 VM_ADMIN_USERNAME=$(terraform -chdir=$TF_DIR output -raw admin_username)
 VM_PUBLIC_IP=$(terraform -chdir=$TF_DIR output -raw public_ip_address)
 
-sed -i'' "s|ACRNAME|$ACRNAME|g" $ANSIBLE_INVENTORY_FILE
 sed -i'' "s|VM_USER|$VM_ADMIN_USERNAME|g" $ANSIBLE_INVENTORY_FILE
 sed -i'' "s|VM_PUBLIC_IP|$VM_PUBLIC_IP|g" $ANSIBLE_INVENTORY_FILE
 

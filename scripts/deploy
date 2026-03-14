@@ -273,7 +273,6 @@ log_info "Archivo de secretos de Ansible actualizado correctamente. Configurando
 declare -A inventory_replacements=(
     [VM_PUBLIC_IP]="$VM_PUBLIC_IP"
     [VM_USER]="$VM_ADMIN_USERNAME"
-    [ACRNAME]="$ACR_ADMIN_USERNAME"
 )
 
 # Reemplazar los placeholders en el archivo de inventario de Ansible
