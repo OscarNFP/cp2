@@ -76,6 +76,42 @@
     state: directory
     mode: '0755'
 
+# Generamos la clave privada de la CA
+- name: Generando clave privada de la CA...
+  become: yes
+  community.crypto.openssl_privatekey:
+    path: "{{ nginx_volume_ssl }}/{{ nginx_ca_key }}"
+    size: 2048
+
+- name: Generando CSR de la CA...
+  become: yes
+  community.crypto.openssl_csr:
+    path: "{{ nginx_volume_ssl }}/{{ nginx_ca_csr }}"
+    privatekey_path: "{{ nginx_volume_ssl }}/{{ nginx_ca_key }}"
+    common_name: "{{ ca_common_name}}"
+    organization_name: "{{ ca_organization_name }}"
+    country_name: "{{ ca_country_name }}"
+    use_common_name_for_san: false
+    basic_constraints:
+      - "{{ ca_basic_constraints }}"
+    basic_constraints_critical: true
+    key_usage:
+      - keyCertSign
+      - cRLSign
+    key_usage_critical: true
+
+# Generamos el certificado raíz de la CA autofirmado
+- name: Generando certificado raíz de la CA...
+  become: yes
+  community.crypto.x509_certificate:
+    path: "{{ nginx_volume_ssl }}/{{ nginx_ca_cert }}"
+    privatekey_path: "{{ nginx_volume_ssl }}/{{ nginx_ca_key }}"
+    csr_path: "{{ nginx_volume_ssl }}/{{ nginx_ca_csr }}"
+    provider: selfsigned
+    selfsigned_digest: "{{ cert_selfsigned_digest }}"
+    selfsigned_not_after: "{{ cert_selfsigned_not_after }}"
+    selfsigned_not_before: "{{ cert_selfsigned_not_before }}"
+
 # Aquí generamos la clave privada para el certificado autofirmado
 - name: Generando clave privada SSL...
   become: yes
@@ -96,17 +132,32 @@
     organization_name: "{{ OrganizationNameCert }}"
     subject_alt_name:
       - "IP:{{ ansible_host }}"
+    extended_key_usage:
+      - serverAuth
+    extended_key_usage_critical: false
 
 # Aquí se genera el certificado autofirmado en base a los 
 # ficheros previos generados
-- name: Generando certificado autofirmado x.509...
+- name: Generando certificado autofirmado x.509 firmado por la CA...
   become: yes
   community.crypto.x509_certificate:
     path: "{{ nginx_volume_ssl }}/{{ nginx_cert_crt }}"
     privatekey_path: "{{ nginx_volume_ssl }}/{{ nginx_cert_key }}"
     csr_path: "{{ nginx_volume_ssl }}/{{ nginx_cert_csr }}"
-    provider: selfsigned
-    selfsigned_digest: sha256
+    provider: ownca
+    ownca_path: "{{ nginx_volume_ssl }}/{{ nginx_ca_cert }}"
+    ownca_privatekey_path: "{{ nginx_volume_ssl }}/{{ nginx_ca_key }}"
+    selfsigned_digest: "{{ cert_selfsigned_digest }}"
+
+# Descargamos el certificado CA a la máquina de control para importarlo en el navegador
+# almacenamos el certificado en /tmp para importarlo en el navegador y posteriormente
+# se eliminará a mano de ese directorio o en el próximo reinicio.
+- name: Descargando certificado CA a la máquina de control...
+  become: yes
+  ansible.builtin.fetch:
+    src: "{{ nginx_volume_ssl }}/{{ nginx_ca_cert }}"
+    dest: "/tmp/ca.crt"
+    flat: yes
 
 # Generamos un fichero de configuración para el método de autenticación
 # básica con usuario y clave del usuario creado previamente.

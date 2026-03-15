@@ -21,7 +21,7 @@ show_menu() {
     echo "+--------------------------------------------------+"
     echo "+  ¡Bienvenid@ al menú interactivo del CP2!        +"
     echo "+                                                  +"
-    echo "+    Elige una de las siguientes opciones:         +"
+    echo "+    Elija una de las siguientes opciones:         +"
     echo "+--------------------------------------------------+"
     echo "+                                                  +"
     echo "+   0. Salir                                       +"
@@ -36,7 +36,7 @@ show_menu() {
 
 show_deploy_menu() {
     echo "+--------------------------------------------------+"
-    echo "+   Seleccione qué quiere despliegar               +"
+    echo "+   Seleccione qué quiere desplegar:               +"
     echo "+--------------------------------------------------+"
     echo "+                                                  +"
     echo "+   0. Retroceder al Menú Principal                +"
