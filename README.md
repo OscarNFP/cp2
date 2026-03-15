@@ -344,10 +344,8 @@ source scripts/cleanvars
 
 ## Problemas conocidos
 
-- **Host key verification failed**: Si redespliegas la infraestructura, ejecuta `ssh-keygen -R <IP>` para limpiar la clave anterior del known_hosts.
+- **Host key verification failed**: Si redespliegas la infraestructura de forma manual, ejecuta `ssh-keygen -R <IP>` para limpiar la clave anterior del known_hosts.
 - **Terraform state perdido**: Si se pierde el estado, elimina el resource group con `az group delete --name <nombreResourceGroup> --yes` y vuelve a desplegar desde cero.
-- **Certificado SSL no válido**: El certificado autofirmado generará un aviso en el navegador. Es el comportamiento esperado sin una CA reconocida.
-
 ---
 
 ## Licencia
