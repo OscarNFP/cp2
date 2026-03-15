@@ -5,7 +5,7 @@
 tag_imagen: "casopractico2"
 
 imagenes:
-  - src: "docker.io/library/nginx:latest"
+  - src: "docker.io/library/nginx:alpine"
     dst: "nginx"
   - src: "docker.io/bitnami/redis:latest"
     dst: "redis"
