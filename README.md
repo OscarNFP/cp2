@@ -350,4 +350,4 @@ source scripts/cleanvars
 
 ## Licencia
 
-Este proyecto está licenciado bajo los términos de la licencia **MIT-0**. Consulta el fichero [LICENSE](./LICENSE) para más información.
+Este proyecto está licenciado bajo los términos de la licencia **MIT**. Consulta el fichero [LICENSE](./LICENSE) para más información.
